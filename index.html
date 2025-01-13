@@ -5,224 +5,608 @@
   <title>Arcadia AI Clicker</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
       height: 100%;
-      background: radial-gradient(circle, #1e3c72, #2a5298);
+      background: url('https://i.gifer.com/fzUl.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Press Start 2P', cursive;
+      color: #fff;
+    }
+    #background-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1s ease;
+      z-index: -1;
+    }
+    #progress-container {
+      position: absolute;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      z-index: 10;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      font-family: 'Press Start 2P', cursive;
+      gap: 10px;
     }
-
-    #header, #footer {
+    .progress-bar {
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      height: 50px; width: 100%;
+      background: #444;
+    }
+    .progress {
       position: absolute;
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      padding: 10px 20px;
-      box-sizing: border-box;
-      color: white;
-      z-index: 10;
+      height: 100%;
+      width: 0%;
+      transition: width 0.5s, background-color 0.5s ease;
     }
-
-    #header {
-      top: 0;
-      justify-content: space-around;
+    .progress-text {
+      position: absolute;
+      z-index: 2;
+      top: 0; left: 0; right: 0;
+      color: white; font-size: 18px;
+      pointer-events: none;
+      display: flex; justify-content: center; align-items: center;
+      height: 100%;
     }
-
+    canvas { display: block; z-index: 1; }
+    .plus-text {
+      position: absolute;
+      color: #ffff99;
+      font-size: 30px;
+      font-family: 'Press Start 2P', cursive;
+      animation: float 1.5s ease-out forwards;
+      pointer-events: none;
+      z-index: 15;
+    }
+    @keyframes float {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-100px); }
+    }
     #footer {
-      bottom: 20px;
-      justify-content: center;
-      gap: 20px;
+      position: absolute;
+      bottom: 50px;
+      display: flex; justify-content: center; align-items: center;
+      gap: 50px; width: 100%; padding: 10px;
+      box-sizing: border-box; z-index: 10;
     }
-
     .icon {
-      width: 50px;
-      height: 50px;
+      width: 100px; height: 100px;
+      cursor: pointer; transition: transform 0.2s ease;
+      display: flex; justify-content: center; align-items: center;
+      filter: brightness(0) invert(1);
+    }
+    .icon:hover { transform: scale(1.2); }
+    #shop-popup,
+    #levels-popup,
+    #invite-popup,
+    #tasks-popup,
+    #dashboard-popup {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 20;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #shop-popup.active,
+    #levels-popup.active,
+    #invite-popup.active,
+    #tasks-popup.active,
+    #dashboard-popup.active {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    #shop-popup ul,
+    #levels-popup ul,
+    #dashboard-popup ul {
+      list-style: none;
+      padding: 0; margin: 0;
+      width: 100%; text-align: center;
+    }
+    #shop-popup li,
+    #levels-popup li {
+      margin: 15px 0;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
       cursor: pointer;
-      transition: transform 0.2s ease;
     }
-
-    .icon:hover {
-      transform: scale(1.2);
-    }
-
-    #game-container, #ai-container {
+    #level-description {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 16px;
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100%;
-      width: 100%;
     }
-
-    #game-container.active, #ai-container.active {
-      display: flex;
+    #level-description img {
+      width: 150px; height: 150px; margin-bottom: 10px;
     }
-
-    .title {
-      font-size: 16px;
+    #shop-popup button,
+    #levels-popup button,
+    #invite-popup button,
+    #tasks-popup button,
+    #dashboard-popup button {
+      background: #1E90FF;
+      border: none;
       color: white;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 90%;
+      margin-top: 20px;
+      text-align: center;
+      font-family: 'Press Start 2P', cursive;
+    }
+    #shop-popup button:disabled { background: gray; cursor: not-allowed; }
+    #coin-highlight {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      display: none;
+      background: radial-gradient(circle, rgba(255,255,224,0.8) 0%, rgba(255,215,0,0) 70%);
+      animation: glow 0.6s ease-out;
+    }
+    @keyframes glow {
+      from { transform: scale(0.8); opacity: 1; }
+      to { transform: scale(1.2); opacity: 0; }
+    }
+    #level-up {
+      position: fixed;
+      top: 20%; left: 50%;
+      transform: translateX(-50%) scale(0);
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 4px solid;
+      border-radius: 15px;
+      font-size: 24px;
+      font-family: 'Press Start 2P', cursive;
+      color: #fff;
+      z-index: 30;
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      pointer-events: none;
+    }
+    #level-up.show {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+    /* Стили для таблицы лидеров и информации об участниках */
+    #dashboard-popup table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    #dashboard-popup th, #dashboard-popup td {
+      padding: 10px;
+      border: 1px solid #fff;
+    }
+    #dashboard-popup th { background: #1E90FF; }
+    .participants-info {
+      color: lightyellow;
+      font-size: 16px;
       margin-bottom: 10px;
     }
-
-    #ai-status {
-      font-size: 14px;
-      color: white;
-      margin-bottom: 20px;
-    }
-
-    #upgrade-button {
-      background: #44ccff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    #upgrade-button:hover {
-      background: #55ddff;
-    }
-
-    canvas {
-      display: block;
-    }
+    .crown { margin-left: 5px; }
+    /* Выделение первых трёх рядов таблицы */
+    #users-table-body tr:nth-child(1) { background: rgba(255, 215, 0, 0.2); font-weight: bold; }
+    #users-table-body tr:nth-child(2) { background: rgba(192, 192, 192, 0.2); font-weight: bold; }
+    #users-table-body tr:nth-child(3) { background: rgba(173, 216, 230, 0.2); font-weight: bold; }
   </style>
 </head>
 <body>
-  <div id="header">
-    <div>ArcadiaCoin (ARCC): <span id="coins">0</span></div>
-    <div>AI Level: <span id="ai-level">1</span></div>
+  <div id="background-overlay"></div>
+  <div id="progress-container">
+    <div class="progress-bar" id="progress-bar">
+      <div class="progress" id="progress"></div>
+      <div class="progress-text" id="progress-text">
+        <span>ArcadiaCoin (ARCC): <span id="coins">0</span> / <span id="maxcoins">500</span></span>
+        &nbsp;|&nbsp;
+        <span>Level: <span id="current-level">1</span></span>
+      </div>
+    </div>
   </div>
-
-  <div id="game-container" class="active">
-    <canvas id="game-canvas"></canvas>
-  </div>
-
-  <div id="ai-container">
-    <div class="title">AI Upgrade Panel</div>
-    <div id="ai-status">Current AI Level: <span id="ai-current-level">1</span></div>
-    <button id="upgrade-button">Upgrade AI (100 ARCC)</button>
-  </div>
-
+  <canvas id="game-canvas"></canvas>
+  <div id="coin-highlight"></div>
   <div id="footer">
-    <img id="game-button" class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Game">
-    <img id="ai-button" class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/artificial-intelligence.png" alt="AI">
-    <img class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/settings.png" alt="Settings">
-    <img class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/help.png" alt="Help">
+    <img id="shop-button" class="icon" src="https://i.ibb.co/pyxwmBN/2025-01-13-182401.png" alt="Shop">
+    <img id="invite-button" class="icon" src="https://i.ibb.co/ZHkthBy/2025-01-13-180941.png" alt="Invite Friend">
+    <img id="tasks-button" class="icon" src="https://i.ibb.co/3TQyPkr/2025-01-13-182825-1.png" alt="Tasks">
+    <img id="dashboard-button" class="icon" src="https://i.ibb.co/2SQVGTy/2025-01-13-183834.png" alt="Dashboard">
   </div>
+
+  <div id="shop-popup">
+    <h3>Upgrade Shop</h3>
+    <ul id="shop-list"></ul>
+    <button id="close-shop">Close</button>
+  </div>
+
+  <div id="levels-popup">
+    <ul id="levels-list"></ul>
+    <div id="level-description">
+      <img id="level-image" src="" alt="Level Image">
+      <p id="level-text"></p>
+    </div>
+    <button id="close-levels">Close</button>
+  </div>
+
+  <div id="invite-popup">
+    <h3>Invite a Friend</h3>
+    <p>If you invite a runner, you will receive 500 ARCC for each invited!</p>
+    <button id="invite-action">Invite via Telegram</button>
+    <button id="close-invite">Close</button>
+  </div>
+
+  <div id="tasks-popup">
+    <h3>Tasks</h3>
+    <p>Various tasks will be available here for rewards.</p>
+    <button id="close-tasks">Close</button>
+  </div>
+
+  <div id="dashboard-popup">
+    <h3>Top Users Dashboard</h3>
+    <div class="participants-info" id="participants-info">Total participants: 17,369</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Nickname</th>
+          <th>ARCC Coins</th>
+        </tr>
+      </thead>
+      <tbody id="users-table-body">
+        <!-- Таблица заполняется через JS -->
+      </tbody>
+    </table>
+    <button id="close-dashboard">Close</button>
+  </div>
+
+  <div id="level-up"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     let scene, camera, renderer, coin;
     let clickCount = 0;
-    let aiLevel = 1;
+    let level = 1;
+    let nextLevelCoins = 500;
 
-    const coinsSpan = document.getElementById("coins");
-    const aiLevelSpan = document.getElementById("ai-level");
-    const aiCurrentLevelSpan = document.getElementById("ai-current-level");
-    const gameContainer = document.getElementById("game-container");
-    const aiContainer = document.getElementById("ai-container");
-    const upgradeButton = document.getElementById("upgrade-button");
+    const levelRequirements = [
+      { level: 1, coins: 500 }, { level: 2, coins: 1000 },
+      { level: 3, coins: 10000 }, { level: 4, coins: 50000 },
+      { level: 5, coins: 100000 }, { level: 6, coins: 200000 },
+      { level: 7, coins: 500000 }, { level: 8, coins: 1000000 },
+      { level: 9, coins: 10000000 }, { level: 10, coins: 50000000 }
+    ];
+    const levelColors = ['#0088cc','#6B5B95','#88B04B','#F7CAC9','#92A8D1','#955251','#B565A7','#009B77','#DD4124','#45B8AC'];
+    const levelBackgrounds = [
+      'https://i.gifer.com/fzUl.gif','https://i.gifer.com/EPts.gif','https://i.gifer.com/ZLm5.gif',
+      'https://i.gifer.com/23YN.gif','https://i.gifer.com/WBVi.gif','https://i.gifer.com/I5zb.gif',
+      'https://i.gifer.com/2YcW.gif','https://i.gifer.com/2swA.gif','https://i.gifer.com/fyrV.gif',
+      'https://i.gifer.com/Q81V.gif'
+    ];
+    const levelNames = ['Beginner','Apprentice','Advanced','Expert','Master','Grandmaster','Legend','Immortal','Divine','Celestial'];
+    const levelDescriptions = [
+      'Starting level, learning the basics.','First steps on the path of mastery.',
+      'Continuing to improve skills.','Expert level achieved.',
+      'Becoming a master of the craft.','Mastering the art of clicking.',
+      'You are a legendary clicker!','Immortals reach the peaks!',
+      'You are almost divine!','Celestial level of clicking in the universe!'
+    ];
+    const upgrades = [
+      { cost: 100, increment: 2, purchased: false },
+      { cost: 10000, increment: 3, purchased: false },
+      { cost: 50000, increment: 4, purchased: false },
+      { cost: 150000, increment: 5, purchased: false },
+      { cost: 1000000, increment: 10, purchased: false },
+    ];
+    let clickIncrement = 1;
+    let users = [];
 
     function init() {
-      // Сцена и камера
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
       camera.position.z = 5;
-
-      // Рендерер
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      gameContainer.appendChild(renderer.domElement);
+      document.body.appendChild(renderer.domElement);
 
-      // Монета
-      const textureLoader = new THREE.TextureLoader();
-      const coinGeometry = new THREE.CircleGeometry(1, 64);
+      const coinGeometry = new THREE.CircleGeometry(1.5, 64);
       const coinMaterial = new THREE.MeshBasicMaterial({
-        map: textureLoader.load("https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png"),
-        transparent: true,
+        map: new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png'),
+        transparent: true
       });
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
+      coin.position.y = 0.5;
       scene.add(coin);
 
-      // Обработчик кликов
-      renderer.domElement.addEventListener("pointerdown", onCoinPointerDown);
+      renderer.domElement.addEventListener('pointerdown', onCoinClick);
+
+      document.getElementById('shop-button').onclick = () => {
+        document.getElementById('shop-popup').classList.add('active');
+      };
+      document.getElementById('close-shop').onclick = () => {
+        document.getElementById('shop-popup').classList.remove('active');
+      };
+      document.getElementById('progress-container').onclick = () => {
+        document.getElementById('levels-popup').classList.add('active');
+      };
+      document.getElementById('close-levels').onclick = () => {
+        document.getElementById('levels-popup').classList.remove('active');
+        document.getElementById('level-description').style.display = 'none';
+      };
+      document.getElementById('invite-button').onclick = () => {
+        document.getElementById('invite-popup').classList.add('active');
+      };
+      document.getElementById('close-invite').onclick = () => {
+        document.getElementById('invite-popup').classList.remove('active');
+      };
+      document.getElementById('invite-action').onclick = () => {
+        const shareText = encodeURIComponent("Join Arcadia AI Clicker!");
+        const shareUrl = encodeURIComponent(window.location.href);
+        const telegramUrl = `tg://msg?text=${shareText}%20${shareUrl}`;
+        window.location.href = telegramUrl;
+        setTimeout(() => {
+          clickCount += 100;
+          document.getElementById('coins').textContent = clickCount;
+          document.getElementById('invite-popup').classList.remove('active');
+        }, 1000);
+      };
+      document.getElementById('tasks-button').onclick = () => {
+        document.getElementById('tasks-popup').classList.add('active');
+      };
+      document.getElementById('close-tasks').onclick = () => {
+        document.getElementById('tasks-popup').classList.remove('active');
+      };
+      document.getElementById('dashboard-button').onclick = () => {
+        document.getElementById('dashboard-popup').classList.add('active');
+      };
+      document.getElementById('close-dashboard').onclick = () => {
+        document.getElementById('dashboard-popup').classList.remove('active');
+      };
+
+      loadShopItems();
+      loadLevelRequirements();
+      updateLevelColor();
+
+      generateUsersTable();
+      startParticipantsUpdater();
 
       animate();
     }
 
-    function onCoinPointerDown() {
-      clickCount++;
-      coinsSpan.textContent = clickCount;
-
-      // Эффект
-      pulseCoin();
+    function generateUsersTable() {
+      const firstNames = ['Иван', 'Алексей', 'Мария', 'Сергей', 'Ольга', 'Дмитрий', 'Никита', 'Екатерина', 'Владимир', 'Анна',
+                         'John', 'Alice', 'Bob', 'Charlie', 'Елена', 'Максим', 'Анастасия', 'Кирилл', 'Полина', 'David', 'Emily',
+                         'Daniel', 'Sophia', 'James', 'Olivia', 'William', 'Ava', 'Ethan', 'Isabella', 'Michael', 'Mia', 'Liam',
+                         'Charlotte', 'Noah', 'Harper', 'Aiden', 'Amelia', 'Jackson', 'Evelyn', 'Matthew', 'Abigail', 'Benjamin',
+                         'Sofia', 'Jayden', 'Mia', 'Lucas', 'Ella', 'Henry', 'Chloe', 'Ahmed', 'Mohamed', 'Ali', 'Omar', 'Youssef',
+                         'Khalid', 'Ibrahim', 'Hassan', 'Hussein', 'Karim', 'Saad'];
+      const lastNames = ['Иванов', 'Петров', 'Сидоров', 'Козлов', 'Кузнецов', 'Смирнов', 'Васильев', 'Соколов', 'Михайлов', 'Федоров',
+                         'Smith', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas',
+                         'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Lewis',
+                         'Ali', 'Khan', 'Ahmed', 'Mohamed', 'Hassan', 'Hussein', 'Ibrahim', 'Khalid', 'Omar', 'Youssef', 'Karim'];
+      for (let i = 0; i < 100; i++) {
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        users.push({
+          nickname: generateRandomNickname(firstName, lastName),
+          coins: generateRandomCoins()
+        });
+      }
+      users[0].coins = 74369512;
+      users.sort((a, b) => b.coins - a.coins);
+      renderUsersTable();
     }
 
-    function pulseCoin() {
-      const initialScale = coin.scale.clone();
-      const targetScale = initialScale.clone().multiplyScalar(1.2);
-
-      let t = 0;
-      const duration = 300;
-      const steps = 30;
-      const interval = duration / steps;
-
-      const scaleIncrement = targetScale.clone().sub(initialScale).divideScalar(steps);
-
-      const pulseInterval = setInterval(() => {
-        if (t < steps / 2) {
-          coin.scale.add(scaleIncrement);
-        } else if (t < steps) {
-          coin.scale.sub(scaleIncrement);
-        } else {
-          clearInterval(pulseInterval);
-          coin.scale.copy(initialScale);
-        }
-        t++;
-      }, interval);
-    }
-
-    function upgradeAI() {
-      if (clickCount >= 100) {
-        clickCount -= 100;
-        aiLevel++;
-        coinsSpan.textContent = clickCount;
-        aiLevelSpan.textContent = aiLevel;
-        aiCurrentLevelSpan.textContent = aiLevel;
-      } else {
-        alert("Not enough ARCC to upgrade AI!");
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-table-body');
+      tbody.innerHTML = '';
+      const crowns = [' 👑🥇', ' 👑🥈', ' 👑🥉'];
+      for (let i = 0; i < users.length; i++) {
+        const tr = document.createElement('tr');
+        const rankTd = document.createElement('td');
+        rankTd.textContent = (i + 1) + (i < 3 ? crowns[i] : '');
+        const nicknameTd = document.createElement('td');
+        nicknameTd.textContent = users[i].nickname;
+        const coinsTd = document.createElement('td');
+        coinsTd.textContent = users[i].coins.toLocaleString();
+        tr.appendChild(rankTd);
+        tr.appendChild(nicknameTd);
+        tr.appendChild(coinsTd);
+        tbody.appendChild(tr);
       }
     }
 
-    // Переключение экранов
-    document.getElementById("ai-button").addEventListener("click", () => {
-      gameContainer.classList.remove("active");
-      aiContainer.classList.add("active");
-    });
+    function generateRandomNickname(firstName, lastName) {
+      const adjectives = ['Speedy', 'Mighty', 'Epic', 'Legendary', 'Crazy', 'Ninja', 'Heroic', 'Swift', 'Fierce'];
+      const numbers = ['1','2','3','4','5','6','7','8','9'];
+      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const number = numbers[Math.floor(Math.random() * numbers.length)];
+      return adj + firstName + number + lastName;
+    }
 
-    document.getElementById("game-button").addEventListener("click", () => {
-      aiContainer.classList.remove("active");
-      gameContainer.classList.add("active");
-    });
+    function generateRandomCoins() {
+      return Math.floor(Math.random() * 10000000) + 1000;
+    }
 
-    // Улучшение ИИ
-    upgradeButton.addEventListener("click", upgradeAI);
+    function startParticipantsUpdater() {
+      let participants = parseInt(localStorage.getItem('participants')) || 17369;
+      const infoElem = document.getElementById('participants-info');
+      if (!infoElem) {
+        const dashboard = document.getElementById('dashboard-popup');
+        const p = document.createElement('div');
+        p.className = 'participants-info';
+        p.id = 'participants-info';
+        p.textContent = 'Total participants: ' + participants.toLocaleString();
+        dashboard.insertBefore(p, dashboard.querySelector('table'));
+      }
+      setInterval(() => {
+        participants += Math.floor(Math.random() * 3) + 1;
+        localStorage.setItem('participants', participants);
+        document.getElementById('participants-info').textContent = 'Total participants: ' + participants.toLocaleString();
+        // Увеличиваем монеты у первых 3 пользователей
+        for (let i = 0; i < 3; i++) {
+          users[i].coins += Math.floor(Math.random() * 50000);
+        }
+        users.sort((a, b) => b.coins - a.coins);
+        renderUsersTable();
+      }, 10000); // обновление каждые 10 секунд
+    }
 
+    function shineCoin() {
+      renderer.domElement.style.filter = 'brightness(2)';
+      setTimeout(() => { renderer.domElement.style.filter = 'brightness(1)'; }, 200);
+    }
+    function updateLevelColor() {
+      const color = levelColors[level - 1] || '#FFFFFF';
+      const background = levelBackgrounds[level - 1] || '';
+      document.getElementById('progress').style.background = color;
+      document.getElementById('current-level').textContent = level;
+      if(background) {
+        const overlay = document.getElementById('background-overlay');
+        overlay.style.backgroundImage = `url('${background}')`;
+        overlay.style.opacity = 1;
+        setTimeout(() => {
+          document.body.style.background = `url('${background}') no-repeat center center fixed`;
+          document.body.style.backgroundSize = 'cover';
+          overlay.style.opacity = 0;
+        }, 1000);
+      }
+    }
+    function isClickOnCoin(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      const distance = Math.sqrt(x * x + y * y);
+      return distance < 250;
+    }
+    function spawnPlusText(text) {
+      const plusSpan = document.createElement('span');
+      plusSpan.className = 'plus-text';
+      plusSpan.textContent = `+${text}`;
+      const { width, height } = renderer.domElement.getBoundingClientRect();
+      plusSpan.style.left = `${width / 2 - 20 + (Math.random() * 40 - 20)}px`;
+      plusSpan.style.top = `${height / 2 - 200 + (Math.random() * 30 - 15)}px`;
+      document.body.appendChild(plusSpan);
+      setTimeout(() => { if (plusSpan.parentNode) plusSpan.parentNode.removeChild(plusSpan); }, 1500);
+    }
+    function animateCoinScale(targetScale, duration) {
+      const initialScale = coin.scale.x;
+      const scaleDifference = targetScale - initialScale;
+      const startTime = performance.now();
+      function animate() {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const newScale = initialScale + scaleDifference * progress;
+        coin.scale.set(newScale, newScale, newScale);
+        if (progress < 1) requestAnimationFrame(animate);
+      }
+      animate();
+    }
+    function showLevelUpAnimation(newLevel) {
+      const levelUpPopup = document.getElementById('level-up');
+      levelUpPopup.style.borderColor = levelColors[newLevel - 1] || '#fff';
+      levelUpPopup.textContent = `Congratulations! Level ${newLevel}`;
+      levelUpPopup.classList.add('show');
+      setTimeout(() => { levelUpPopup.classList.remove('show'); }, 3000);
+    }
+    function onCoinClick(event) {
+      if (!isClickOnCoin(event)) return;
+      shineCoin();
+      const highlight = document.getElementById('coin-highlight');
+      const rect = renderer.domElement.getBoundingClientRect();
+      highlight.style.left = `${event.clientX - rect.left - 200}px`;
+      highlight.style.top = `${event.clientY - rect.top - 200}px`;
+      highlight.style.display = 'block';
+      setTimeout(() => { highlight.style.display = 'none'; }, 600);
+      animateCoinScale(1.3, 50);
+      setTimeout(() => animateCoinScale(1.1, 50), 50);
+      setTimeout(() => animateCoinScale(1.0, 50), 100);
+      spawnPlusText(clickIncrement);
+      clickCount += clickIncrement;
+      document.getElementById('coins').textContent = clickCount;
+      document.getElementById('maxcoins').textContent = nextLevelCoins;
+      updateProgress();
+    }
+    function updateProgress() {
+      const progressPercent = (clickCount / nextLevelCoins) * 100;
+      document.getElementById('progress').style.width = `${progressPercent}%`;
+      if (clickCount >= nextLevelCoins) {
+        level++;
+        showLevelUpAnimation(level);
+        const nextLevel = levelRequirements.find(req => req.level === level);
+        nextLevelCoins = nextLevel ? nextLevel.coins : nextLevelCoins * 2;
+        document.getElementById('maxcoins').textContent = nextLevelCoins;
+        updateLevelColor();
+      }
+    }
+    function loadShopItems() {
+      const shopList = document.getElementById('shop-list');
+      upgrades.forEach((upgrade) => {
+        const listItem = document.createElement('li');
+        const button = document.createElement('button');
+        button.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} Arcadia Coins)`;
+        button.onclick = () => {
+          if (clickCount >= upgrade.cost && !upgrade.purchased) {
+            clickCount -= upgrade.cost;
+            clickIncrement += upgrade.increment;
+            upgrade.purchased = true;
+            document.getElementById('coins').textContent = clickCount;
+            button.disabled = true;
+          }
+        };
+        listItem.appendChild(button);
+        shopList.appendChild(listItem);
+      });
+    }
+    function loadLevelRequirements() {
+      const levelsList = document.getElementById('levels-list');
+      levelRequirements.forEach((req, index) => {
+        const listItem = document.createElement('li');
+        listItem.style.color = levelColors[index] || '#FFFFFF';
+        listItem.textContent = `Level ${req.level} (${levelNames[index]}) : ${req.coins} ARCC`;
+        listItem.onclick = () => {
+          const description = document.getElementById('level-description');
+          const levelImg = document.getElementById('level-image');
+          const levelTxt = document.getElementById('level-text');
+          levelImg.src = levelBackgrounds[index] || '';
+          levelTxt.textContent = levelDescriptions[index] || '';
+          description.style.display = 'flex';
+        };
+        levelsList.appendChild(listItem);
+      });
+    }
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     }
-
     init();
   </script>
 </body>
