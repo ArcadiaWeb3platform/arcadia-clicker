@@ -373,7 +373,7 @@
         const telegramUrl = `tg://msg?text=${shareText}%20${shareUrl}`;
         window.location.href = telegramUrl;
         setTimeout(() => {
-          clickCount += 100;
+          clickCount += 1000;
           document.getElementById('coins').textContent = clickCount;
           document.getElementById('invite-popup').classList.remove('active');
         }, 1000);
