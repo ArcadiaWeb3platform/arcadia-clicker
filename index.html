@@ -19,7 +19,7 @@
       background-size: cover;
       color: #fff;
       box-sizing: border-box;
-      -webkit-text-size-adjust: none; /* iOS не меняет размер шрифта */
+      -webkit-text-size-adjust: none;
     }
 
     /* ЭКРАН ЗАГРУЗКИ */
@@ -64,7 +64,7 @@
       color: #ffec99;
     }
 
-    /* Оверлей для плавной смены фона */
+    /* Фоновый оверлей для плавного переключения фоновых GIF */
     #background-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -120,8 +120,8 @@
     /* Блок уровня (справа) */
     #level-container {
       position: absolute;
-      top: 58px; /* Сместили ниже прогресс-бара */
-      right: 20px; /* правее */
+      top: 58px; 
+      right: 20px; 
       background: #444;  
       color: #fff;       
       border-radius: 8px;
@@ -134,7 +134,7 @@
     /* Имя пользователя (слева, чуть ниже прогресс-бара) */
     #username-display {
       position: absolute;
-      top: 58px;    /* тоже 58px, чтобы быть на одной высоте с level, но слева */
+      top: 58px;
       left: 20px;
       font-size: 10px; /* меньше шрифт */
       background: rgba(0,0,0,0.4);
@@ -142,7 +142,7 @@
       border-radius: 8px;
       z-index: 10;
       transition: color 0.5s ease;
-      display: none; /* покажем после загрузки */
+      display: none; 
     }
 
     /* CANVAS */
@@ -277,10 +277,10 @@
       margin-bottom: 10px;
     }
 
-    /* Специально для dashboard: шире по width и меньше по высоте */
+    /* Специально для dashboard: шире, но ниже */
     #dashboard-popup {
-      width: 85%;        /* чуть шире */
-      max-height: 50vh;  /* ниже */
+      width: 85%;        
+      max-height: 50vh;  
     }
 
     /* Списки */
@@ -382,7 +382,6 @@
         width: 40px; 
         height: 40px;
       }
-
       #dashboard-popup {
         width: 90%;
         max-height: 50vh;
@@ -456,6 +455,7 @@
     <ul id="shop-list"></ul>
     <button id="close-shop">Close</button>
   </div>
+
   <div id="levels-popup">
     <h3>Levels</h3>
     <ul id="levels-list"></ul>
@@ -465,18 +465,21 @@
     </div>
     <button id="close-levels">Close</button>
   </div>
+
   <div id="invite-popup">
     <h3>Invite a Friend</h3>
     <p>If you invite a runner, you will receive 500 ARCC for each invited!</p>
     <button id="invite-action">Invite via Telegram</button>
     <button id="close-invite">Close</button>
   </div>
+
   <div id="tasks-popup">
     <h3>Tasks</h3>
     <p>Various tasks will be available here for rewards.</p>
     <ul id="tasks-list"></ul>
     <button id="close-tasks">Close</button>
   </div>
+
   <div id="dashboard-popup">
     <h3>Top Users Dashboard</h3>
     <div class="participants-info" id="participants-info">Total participants: 17,369</div>
@@ -498,7 +501,7 @@
   <!-- Level Up анимация -->
   <div id="level-up"></div>
 
-  <!-- АУДИО: клики и музыка (замените ссылки на свои файлы, если нужно) -->
+  <!-- АУДИО: клики и музыка (замените ссылки на свои файлы) -->
   <audio id="coin-click-sound" src="https://yourcdn.com/sounds/coin-click.mp3" preload="auto"></audio>
   <audio id="button-click-sound" src="https://yourcdn.com/sounds/button-click.mp3" preload="auto"></audio>
   <audio id="background-music" src="https://yourcdn.com/sounds/bg-music.mp3" preload="auto" loop></audio>
@@ -511,25 +514,23 @@
     let userId = null;
     let userName = null;
 
-    // Если открыто через Telegram WebApp, получаем данные пользователя
+    // Если открыто через Telegram WebApp
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
       tg = window.Telegram.WebApp;
       tg.expand();
       tg.ready();
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         userId = tg.initDataUnsafe.user.id;
-        // Можно взять username или first_name
         userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
       }
     }
 
-    // Если нет данных из TG, пусть будет ArcadiaUser
+    // Если нет данных от Telegram
     if (!userName) {
       userName = "ArcadiaUser";
       userId = "arcadia_unknown";
     }
   </script>
-
   <script>
     let scene, camera, renderer, coin;
     let clickCount = 0;
@@ -538,11 +539,12 @@
     let clickIncrement = 1;
     let users = [];
 
+    // Аудио
     const coinClickSound = document.getElementById('coin-click-sound');
     const buttonClickSound = document.getElementById('button-click-sound');
     const backgroundMusic = document.getElementById('background-music');
 
-    // Уровни, требования, цвета, фоны, описания
+    // Уровни, цвета, фоны
     const levelRequirements = [
       { level: 1, coins: 500 },
       { level: 2, coins: 1000 },
@@ -609,10 +611,10 @@
     ];
 
     function init() {
-      // Показать ник на экране загрузки
+      // Показываем ник на экране загрузки
       document.getElementById('telegram-username').textContent = "Hello, " + userName;
 
-      // После загрузки покажем ник слева
+      // После загрузки показываем ник слева
       document.getElementById('username-display').textContent = userName;
 
       // Загружаем сохранённые данные
@@ -631,8 +633,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Монета (чёткая картинка, радиус 2.0)
-      // При необходимости замените ссылку на свою, более чёткую картинку.
+      // Монета (радиус 2.0), опускаем ниже (y = 0.6)
       const coinGeometry = new THREE.CircleGeometry(2.0, 64);
       const coinTexture = new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png');
       const coinMaterial = new THREE.MeshBasicMaterial({
@@ -640,10 +641,10 @@
         transparent: true
       });
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      coin.position.y = 1.0;
+      coin.position.y = 0.6; // стало чуть ниже
       scene.add(coin);
 
-      // Клик
+      // Клик по canvas
       renderer.domElement.addEventListener('pointerdown', onCoinClick);
 
       // Звук клика для кнопок
@@ -701,7 +702,7 @@
         document.getElementById('dashboard-popup').classList.remove('active');
       };
 
-      // Заполняем магазин / уровни / задачи
+      // Магазин / уровни / задачи
       loadShopItems();
       loadLevelRequirements();
       loadTasks();
@@ -709,7 +710,7 @@
       // Цвет уровня, фон
       updateLevelColor();
 
-      // Генерируем таблицу + автообновление
+      // Таблица + автообновление
       generateUsersTable();
       startParticipantsUpdater();
 
@@ -909,16 +910,25 @@
     function loadTasks() {
       const tasksList = document.getElementById('tasks-list');
       tasksList.innerHTML = '';
-      tasks.forEach((task)=>{
+      tasks.forEach((task, index)=>{
         const li = document.createElement('li');
         li.style.marginBottom = '5px';
+        // Если уже выполнена, зачёркиваем
+        if (task.completed) {
+          li.style.color = 'gray';
+          li.style.textDecoration = 'line-through';
+        }
         li.textContent = `${task.name} — Reward: ${task.reward} ARCC`;
         li.onclick = () => {
-          if(task.completed) return;
-          if(checkTaskCompletion(task.name)){
+          // Если задача уже выполнена, ничего не делаем
+          if (task.completed) return;
+
+          // Проверяем условие выполнения
+          if (checkTaskCompletion(task.name)) {
             clickCount += task.reward;
             document.getElementById('coins').textContent = clickCount;
             task.completed = true;
+            // Зачёркиваем
             li.style.color = 'gray';
             li.style.textDecoration = 'line-through';
             saveGameState();
@@ -983,7 +993,7 @@
       highlight.style.display = 'block';
       setTimeout(() => { highlight.style.display = 'none'; }, 600);
 
-      // Лёгкая анимация масштаба
+      // Анимация масштаба
       animateCoinScale(1.1, 50);
       setTimeout(() => animateCoinScale(1.0, 50), 50);
 
@@ -999,13 +1009,16 @@
       saveGameState();
     }
 
-    // Уменьшили радиус клика, чтобы не было «глюка» по краям
+    // Учитываем, что монета опущена на y=0.6, и уменьшаем радиус клика
     function isClickOnCoin(event) {
       const rect = renderer.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left - (rect.width / 2);
-      const y = event.clientY - rect.top - (rect.height / 2);
-      const distance = Math.sqrt(x*x + y*y);
-      return distance < 120; /* вместо 200 */
+      // Вычислим координаты на канвасе
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      // Корректируем на то, что монета в THREE.JS смещена по Y
+      // но проще уменьшить радиус, чтобы избежать глюков
+      const distance = Math.sqrt(x*x + (y - (-0.6*rect.height/6))*(y - (-0.6*rect.height/6)));
+      return distance < 120;
     }
 
     function animateCoinScale(targetScale, duration){
