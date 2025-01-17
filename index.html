@@ -9,23 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <style>
-    /* Чтобы iOS не изменял размеры шрифта автоматически */
-    html {
-      -webkit-text-size-adjust: none;
-    }
-
-    /* Сброс отступов и скролла */
+    /* Сброс / базовые стили */
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden; /* Отключаем прокрутку */
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
       font-family: 'Press Start 2P', cursive;
       background: url('https://i.gifer.com/fzUl.gif') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       box-sizing: border-box;
+      -webkit-text-size-adjust: none; /* iOS не меняет размер шрифта */
     }
 
     /* ЭКРАН ЗАГРУЗКИ */
@@ -43,12 +37,10 @@
       visibility: visible;
       opacity: 1;
     }
-    /* Скрываем после загрузки */
     #loading-screen.hidden {
       visibility: hidden;
       opacity: 0;
     }
-    /* Анимация бегущих точек "Loading..." */
     @keyframes loadingDots {
       0%   { content: "Loading"; }
       25%  { content: "Loading."; }
@@ -57,41 +49,35 @@
       100% { content: "Loading"; }
     }
     .loading-text {
-      /* CHANGED: сделаем текст чуть меньше */
-      font-size: 12px; 
+      font-size: 12px; /* Сделали меньше */
     }
     .loading-text::after {
       font-family: 'Press Start 2P', cursive;
       content: "Loading";
       animation: loadingDots 2s infinite;
-      white-space: pre;
       display: inline-block;
       margin-left: 5px;
     }
-
-    /* Никнейм во время загрузки */
     #telegram-username {
-      margin-top: 15px;
-      font-size: 12px; /* CHANGED: чуть меньше */
+      margin-top: 10px;
+      font-size: 12px;
       color: #ffec99;
     }
 
-    /* Отображение имени в левом верхнем углу после загрузки */
-    /* ADDED */
+    /* Отображение имени пользователя (из TG) слева вверху */
     #username-display {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #ffec99;
+      top: 10px; left: 10px;
       font-size: 14px;
       z-index: 9999;
       pointer-events: none;
       background: rgba(0,0,0,0.4);
       padding: 5px 8px;
       border-radius: 10px;
+      transition: color 0.5s ease; /* Будем менять цвет под уровень */
     }
 
-    /* Фон, перекрывающийся анимацией смены */
+    /* Фоновый оверлей для плавной смены */
     #background-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -136,7 +122,7 @@
       z-index: 2;
       top: 0; left: 0; right: 0;
       color: white; 
-      font-size: 12px; /* уже стояло 12px */
+      font-size: 12px;
       pointer-events: none;
       display: flex; 
       justify-content: center; 
@@ -144,32 +130,29 @@
       height: 100%;
     }
 
-    /* ADDED: отдельный блок для Level ниже прогресса */
+    /* Блок для уровня (фон как у прогресс-бара, текст цветной) */
     #level-container {
-      /* Изначально цвет поменяем динамически */
-      color: #ffffff;
-      font-size: 16px;
-      border: 2px solid #fff;
+      background: #444;    /* Фон как у прогресс-бара */
+      color: #fff;         /* Будет меняться на цвет уровня через JS */
       border-radius: 8px;
       padding: 4px 10px;
-      text-align: center;
-      transition: all 0.5s;
+      font-size: 14px;
+      transition: color 0.5s ease;
     }
 
-    /* Канвас */
+    /* CANVAS */
     canvas {
       display: block;
       position: absolute;
-      top: 0; 
-      left: 0;
+      top: 0; left: 0;
       z-index: 1;
     }
 
-    /* Анимация всплывающих +x монет */
+    /* Всплывающий +x при клике */
     .plus-text {
       position: absolute;
       color: #ffff99;
-      font-size: 20px; 
+      font-size: 20px;
       font-family: 'Press Start 2P', cursive;
       animation: float 1.5s ease-out forwards;
       pointer-events: none;
@@ -180,10 +163,10 @@
       100% { opacity: 0; transform: translateY(-100px); }
     }
 
-    /* Футер с иконками */
+    /* Футер с иконками (поднимаем выше) */
     #footer {
       position: fixed;
-      bottom: 20px;
+      bottom: 100px; /* Подняли выше */
       display: flex; 
       justify-content: center; 
       align-items: center;
@@ -192,7 +175,7 @@
       box-sizing: border-box;
       z-index: 9999;
     }
-    /* CHANGED: делаем иконки немного меньше */
+    /* Иконки снизу чуть меньше */
     .icon {
       width: 50px; 
       height: 50px;
@@ -207,91 +190,7 @@
       transform: scale(1.1);
     }
 
-    /* Попапы */
-    /* CHANGED: уменьшим с 90% до 80% + padding */
-    #shop-popup,
-    #levels-popup,
-    #invite-popup,
-    #tasks-popup,
-    #dashboard-popup {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      padding: 15px; /* было 20px-30px */
-      border-radius: 15px;
-      text-align: center;
-      z-index: 20;
-      width: 80%; /* было 90% */
-      max-height: 80vh;
-      overflow-y: auto;
-      opacity: 0;
-      transition: transform 0.5s ease, opacity 0.5s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    #shop-popup.active,
-    #levels-popup.active,
-    #invite-popup.active,
-    #tasks-popup.active,
-    #dashboard-popup.active {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-    }
-    #shop-popup ul,
-    #levels-popup ul,
-    #dashboard-popup ul {
-      list-style: none;
-      padding: 0; margin: 0;
-      width: 100%; text-align: center;
-    }
-    #shop-popup li,
-    #levels-popup li {
-      margin: 10px 0;
-      text-align: center;
-      font-size: 12px; 
-      line-height: 1.4;
-      cursor: pointer;
-    }
-    #level-description {
-      margin-top: 15px; 
-      text-align: center;
-      font-size: 12px; 
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-    #level-description img {
-      width: 100px; 
-      height: 100px; 
-      margin-bottom: 10px;
-    }
-    #shop-popup button,
-    #levels-popup button,
-    #invite-popup button,
-    #tasks-popup button,
-    #dashboard-popup button {
-      background: #1E90FF;
-      border: none;
-      color: white;
-      padding: 10px; 
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      width: 90%;
-      margin-top: 15px; 
-      text-align: center;
-      font-family: 'Press Start 2P', cursive;
-    }
-    #shop-popup button:disabled {
-      background: gray; 
-      cursor: not-allowed;
-    }
-
-    /* Вспышка при нажатии на монету */
+    /* Оверлей-вспышка при клике */
     #coin-highlight {
       position: absolute;
       width: 300px; 
@@ -331,16 +230,108 @@
       opacity: 1;
     }
 
+    /* Попап-окна, делаем меньше (70%) + шрифты поменьше */
+    #shop-popup,
+    #levels-popup,
+    #invite-popup,
+    #tasks-popup,
+    #dashboard-popup {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 10px; /* меньше */
+      border-radius: 15px;
+      text-align: center;
+      z-index: 20;
+      width: 70%; /* было 80-90 */
+      max-height: 80vh;
+      overflow-y: auto;
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px; /* Общий мелкий шрифт */
+    }
+    #shop-popup.active,
+    #levels-popup.active,
+    #invite-popup.active,
+    #tasks-popup.active,
+    #dashboard-popup.active {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    /* Заголовки попапов чуть меньше */
+    #shop-popup h3,
+    #levels-popup h3,
+    #invite-popup h3,
+    #tasks-popup h3,
+    #dashboard-popup h3 {
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    /* Списки */
+    #shop-popup ul,
+    #levels-popup ul,
+    #dashboard-popup ul {
+      list-style: none;
+      padding: 0; margin: 0;
+      width: 100%; text-align: center;
+    }
+    #shop-popup li,
+    #levels-popup li {
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    /* Описание уровня */
+    #level-description {
+      margin-top: 5px; 
+      text-align: center;
+      font-size: 10px; 
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    #level-description img {
+      width: 80px; 
+      height: 80px;
+      margin-bottom: 5px;
+    }
+    /* Кнопки внутри попапов */
+    #shop-popup button,
+    #levels-popup button,
+    #invite-popup button,
+    #tasks-popup button,
+    #dashboard-popup button {
+      background: #1E90FF;
+      border: none;
+      color: white;
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 10px;
+      width: 80%;
+      margin-top: 10px;
+      font-family: 'Press Start 2P', cursive;
+    }
+    #shop-popup button:disabled {
+      background: gray; 
+      cursor: not-allowed;
+    }
+
     /* Таблица лидеров */
     #dashboard-popup table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px; 
-      font-size: 12px;
+      margin-top: 5px;
+      font-size: 10px;
     }
     #dashboard-popup th,
     #dashboard-popup td {
-      padding: 8px; 
+      padding: 5px; 
       border: 1px solid #fff;
     }
     #dashboard-popup th {
@@ -348,11 +339,8 @@
     }
     .participants-info {
       color: lightyellow;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-    .crown {
-      margin-left: 5px;
+      font-size: 12px;
+      margin-bottom: 5px;
     }
     #users-table-body tr:nth-child(1) {
       background: rgba(255, 215, 0, 0.2); 
@@ -367,46 +355,73 @@
       font-weight: bold;
     }
 
-    /*************************************************************/
-    /*       МЕДИА-ЗАПРОСЫ ДЛЯ ОЧЕНЬ УЗКИХ ЭКРАНОВ (<768px)       */
-    /*************************************************************/
+    /* Иконки в правом верхнем углу для звука/вибрации */
+    #sound-panel {
+      position: fixed;
+      top: 10px; 
+      right: 10px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .icon-sound {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      filter: brightness(0) invert(1);
+      transition: transform 0.2s ease;
+    }
+    .icon-sound:hover {
+      transform: scale(1.1);
+    }
+
+    /* Адаптив под узкие экраны */
     @media only screen and (max-width: 768px) {
-      .icon {
-        width: 40px;
-        height: 40px;
-      }
       .progress-bar {
         height: 30px;
       }
       .progress-text {
         font-size: 10px;
       }
-      #footer {
-        bottom: 10px;
-        gap: 20px;
-      }
       #progress-container {
         top: 5px;
       }
-      #dashboard-popup th, #dashboard-popup td {
-        padding: 6px;
-        font-size: 10px;
+      #footer {
+        bottom: 80px;
+      }
+      #shop-popup,
+      #levels-popup,
+      #invite-popup,
+      #tasks-popup,
+      #dashboard-popup {
+        width: 80%;
+        font-size: 9px;
       }
       #shop-popup button,
       #levels-popup button,
       #invite-popup button,
       #tasks-popup button,
       #dashboard-popup button {
-        padding: 8px;
+        font-size: 9px;
+      }
+      #username-display {
         font-size: 12px;
       }
       #level-container {
         font-size: 12px;
       }
+      .icon {
+        width: 40px; 
+        height: 40px;
+      }
+      .icon-sound {
+        width: 35px;
+        height: 35px;
+      }
     }
   </style>
 </head>
-
 <body>
   <!-- ЭКРАН ЗАГРУЗКИ -->
   <div id="loading-screen">
@@ -414,32 +429,43 @@
     <div id="telegram-username"></div>
   </div>
 
+  <!-- Фоновый оверлей -->
   <div id="background-overlay"></div>
 
-  <!-- ADDED: Отображение ника в левом верхнем углу после загрузки -->
-  <div id="username-display" style="display: none;">Guest</div>
+  <!-- Имя пользователя -->
+  <div id="username-display" style="display: none;">ArcadiaUser</div>
 
+  <!-- Контейнер прогресса -->
   <div id="progress-container">
-    <!-- Прогресс-бар (только ArcadiaCoin) -->
     <div class="progress-bar" id="progress-bar">
       <div class="progress" id="progress"></div>
       <div class="progress-text" id="progress-text">
-        <span>ArcadiaCoin (ARCC): <span id="coins">0</span> / <span id="maxcoins">500</span></span>
+        ArcadiaCoin (ARCC): <span id="coins">0</span> / <span id="maxcoins">500</span>
       </div>
     </div>
-    <!-- ADDED: отдельный блок для уровня ниже -->
     <div id="level-container">Level <span id="current-level">1</span></div>
   </div>
 
+  <!-- CANVAS -->
   <canvas id="game-canvas"></canvas>
 
+  <!-- Вспышка -->
   <div id="coin-highlight"></div>
 
+  <!-- Кнопки снизу -->
   <div id="footer">
     <img id="shop-button" class="icon" src="https://i.ibb.co/pyxwmBN/2025-01-13-182401.png" alt="Shop">
     <img id="invite-button" class="icon" src="https://i.ibb.co/ZHkthBy/2025-01-13-180941.png" alt="Invite Friend">
     <img id="tasks-button" class="icon" src="https://i.ibb.co/3TQyPkr/2025-01-13-182825-1.png" alt="Tasks">
     <img id="dashboard-button" class="icon" src="https://i.ibb.co/2SQVGTy/2025-01-13-183834.png" alt="Dashboard">
+  </div>
+
+  <!-- Кнопки звука и вибрации (в правом верхнем углу) -->
+  <div id="sound-panel">
+    <img id="sound-toggle-button" class="icon-sound" 
+         src="https://i.ibb.co/RbXyzYv/sound-on.png" alt="Sound Toggle">
+    <img id="vibration-toggle-button" class="icon-sound"
+         src="https://i.ibb.co/KzLH3xQ/vibration-off.png" alt="Vibration Toggle">
   </div>
 
   <!-- Попапы -->
@@ -448,8 +474,8 @@
     <ul id="shop-list"></ul>
     <button id="close-shop">Close</button>
   </div>
-
   <div id="levels-popup">
+    <h3>Levels</h3>
     <ul id="levels-list"></ul>
     <div id="level-description">
       <img id="level-image" src="" alt="Level Image">
@@ -457,21 +483,18 @@
     </div>
     <button id="close-levels">Close</button>
   </div>
-
   <div id="invite-popup">
     <h3>Invite a Friend</h3>
     <p>If you invite a runner, you will receive 500 ARCC for each invited!</p>
     <button id="invite-action">Invite via Telegram</button>
     <button id="close-invite">Close</button>
   </div>
-
   <div id="tasks-popup">
     <h3>Tasks</h3>
     <p>Various tasks will be available here for rewards.</p>
     <ul id="tasks-list"></ul>
     <button id="close-tasks">Close</button>
   </div>
-
   <div id="dashboard-popup">
     <h3>Top Users Dashboard</h3>
     <div class="participants-info" id="participants-info">Total participants: 17,369</div>
@@ -492,14 +515,19 @@
 
   <div id="level-up"></div>
 
+  <!-- АУДИО: клики и музыка (примерные ссылки, замените на свои) -->
+  <audio id="coin-click-sound" src="https://yourcdn.com/sounds/coin-click.mp3" preload="auto"></audio>
+  <audio id="button-click-sound" src="https://yourcdn.com/sounds/button-click.mp3" preload="auto"></audio>
+  <audio id="background-music" src="https://yourcdn.com/sounds/bg-music.mp3" preload="auto" loop></audio>
+
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <!-- Telegram WebApp объект -->
+  <!-- Telegram WebApp -->
   <script>
     let tg = null;
-    let userId = 'guest';
-    let userName = 'Guest';
+    let userId = null;
+    let userName = null;
+
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
       tg = window.Telegram.WebApp;
       tg.expand();
@@ -509,17 +537,30 @@
         userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
       }
     }
+
+    // Если нет данных о пользователе из ТГ, пусть всё равно не будет Guest — но назовём "ArcadiaUser"
+    if (!userName) {
+      userName = "ArcadiaUser";
+      userId = "arcadia_unknown";
+    }
   </script>
 
   <script>
-    let scene, camera, renderer, coin, coinRing; /* ADDED coinRing для обводки */
+    let scene, camera, renderer, coin;
     let clickCount = 0;
     let level = 1;
     let nextLevelCoins = 500;
     let clickIncrement = 1;
     let users = [];
 
-    // Уровни, их требования, цвета, фоны, описания
+    let soundEnabled = true;
+    let vibrationEnabled = false;
+
+    const coinClickSound = document.getElementById('coin-click-sound');
+    const buttonClickSound = document.getElementById('button-click-sound');
+    const backgroundMusic = document.getElementById('background-music');
+
+    // Уровни, цвета, фоны, описания
     const levelRequirements = [
       { level: 1, coins: 500 },
       { level: 2, coins: 1000 },
@@ -587,13 +628,12 @@
 
     function init() {
       // Показываем ник на экране загрузки
-      document.getElementById('telegram-username').textContent = 
-        (userName !== 'Guest') ? `Hello, ${userName}` : 'Guest mode';
+      document.getElementById('telegram-username').textContent = "Hello, " + userName;
 
-      // После загрузки также показываем ник слева вверху
+      // После загрузки показываем ник слева вверху
       document.getElementById('username-display').textContent = userName;
-      
-      // Загрузить сохранённое состояние
+
+      // Загружаем сохранённые данные
       loadGameState();
 
       scene = new THREE.Scene();
@@ -609,39 +649,38 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Монета (сделаем больше радиус)
-      const coinGeometry = new THREE.CircleGeometry(1.7, 64); /* CHANGED: было 1.2 */
+      // Монета (больше радиус — 2.0)
+      const coinGeometry = new THREE.CircleGeometry(2.0, 64);
       const coinTexture = new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png');
       const coinMaterial = new THREE.MeshBasicMaterial({
         map: coinTexture,
         transparent: true
       });
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      coin.position.y = 1.0; 
+      coin.position.y = 1.0;
       scene.add(coin);
 
-      // Обводка (кольцо) для монеты
-      /* ADDED: создаём чуть больший радиус и задаём текущий цвет уровня */
-      const ringGeometry = new THREE.RingGeometry(1.8, 2.0, 64);
-      const ringMaterial = new THREE.MeshBasicMaterial({ 
-        color: levelColors[level - 1], 
-        side: THREE.DoubleSide 
-      });
-      coinRing = new THREE.Mesh(ringGeometry, ringMaterial);
-      coinRing.position.y = 1.0;
-      scene.add(coinRing);
-
-      // Клик по канвасу (проверяем, попал ли в радиус монеты)
+      // Слушатель клика мышью/тапа
       renderer.domElement.addEventListener('pointerdown', onCoinClick);
 
-      // Кнопки магазинов / попапов
+      // Привяжем звуковой клик к кнопкам
+      const allButtons = document.querySelectorAll('button, .icon');
+      allButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (soundEnabled) {
+            buttonClickSound.currentTime = 0;
+            buttonClickSound.play().catch(()=>{});
+          }
+        });
+      });
+
+      // Кнопки в интерфейсе
       document.getElementById('shop-button').onclick = () => {
         document.getElementById('shop-popup').classList.add('active');
       };
       document.getElementById('close-shop').onclick = () => {
         document.getElementById('shop-popup').classList.remove('active');
       };
-
       document.getElementById('progress-container').onclick = () => {
         document.getElementById('levels-popup').classList.add('active');
       };
@@ -649,7 +688,6 @@
         document.getElementById('levels-popup').classList.remove('active');
         document.getElementById('level-description').style.display = 'none';
       };
-
       document.getElementById('invite-button').onclick = () => {
         document.getElementById('invite-popup').classList.add('active');
       };
@@ -669,14 +707,12 @@
           saveGameState();
         }, 1000);
       };
-
       document.getElementById('tasks-button').onclick = () => {
         document.getElementById('tasks-popup').classList.add('active');
       };
       document.getElementById('close-tasks').onclick = () => {
         document.getElementById('tasks-popup').classList.remove('active');
       };
-
       document.getElementById('dashboard-button').onclick = () => {
         document.getElementById('dashboard-popup').classList.add('active');
       };
@@ -684,37 +720,69 @@
         document.getElementById('dashboard-popup').classList.remove('active');
       };
 
-      // Заполнить магазин / уровни / задачи
+      // Загрузить магазин / уровни / задачи
       loadShopItems();
       loadLevelRequirements();
       loadTasks();
 
-      // Настроить цвет уровня
+      // Цвет и фон уровня
       updateLevelColor();
 
-      // Сгенерировать таблицу
+      // Сгенерировать таблицу + автообновление
       generateUsersTable();
       startParticipantsUpdater();
 
+      // Слушатель resize
       window.addEventListener('resize', onWindowResize);
 
+      // Запускаем анимацию
       animate();
 
-      // Убираем экран загрузки, показываем username-display
+      // Прячем экран загрузки, показываем nickname
       setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('username-display').style.display = 'block';
-      }, 800);
+      }, 600);
+
+      // Автовоспроизведение фоновой музыки (может блокироваться браузером без user gesture)
+      // Попробуем запустить после минимального взаимодействия
+      // или добавить кнопку ручного старта. Пока просто:
+      backgroundMusic.volume = 0.4;
+      try {
+        backgroundMusic.play().catch(()=>{});
+      } catch(e) {}
     }
 
-    // Resize
+    /* Звук / вибрация - панель справа */
+    const soundToggleBtn = document.getElementById('sound-toggle-button');
+    const vibrationToggleBtn = document.getElementById('vibration-toggle-button');
+    soundToggleBtn.onclick = () => {
+      soundEnabled = !soundEnabled;
+      // Останавливаем или запускаем музыку
+      if (!soundEnabled) {
+        backgroundMusic.pause();
+        soundToggleBtn.src = "https://i.ibb.co/dG5C6ZY/sound-off.png"; // иконка "нет звука"
+      } else {
+        backgroundMusic.play().catch(()=>{});
+        soundToggleBtn.src = "https://i.ibb.co/RbXyzYv/sound-on.png"; // иконка "звук включён"
+      }
+    };
+    vibrationToggleBtn.onclick = () => {
+      vibrationEnabled = !vibrationEnabled;
+      if (vibrationEnabled) {
+        vibrationToggleBtn.src = "https://i.ibb.co/YcfdXxX/vibration-on.png";
+      } else {
+        vibrationToggleBtn.src = "https://i.ibb.co/KzLH3xQ/vibration-off.png";
+      }
+    };
+
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // Сохранить / Загрузить
+    // Сохранение
     function saveGameState() {
       const gameData = {
         clickCount,
@@ -755,31 +823,24 @@
       }
     }
 
-    // Генерация таблицы пользователей
+    // Таблица пользователей
     function generateUsersTable() {
-      const firstNames = [
-        'Иван','Алексей','Мария','Сергей','Ольга','Дмитрий','Никита','Екатерина','Владимир','Анна',
-        'John','Alice','Bob','Charlie','Елена','Максим','Анастасия','Кирилл','Полина','David','Emily',
-        'Daniel','Sophia','James','Olivia','William','Ava','Ethan','Isabella','Michael','Mia','Liam',
-        'Charlotte','Noah','Harper','Aiden','Amelia','Jackson','Evelyn','Matthew','Abigail','Benjamin',
-        'Sofia','Jayden','Mia','Lucas','Ella','Henry','Chloe','Ahmed','Mohamed','Ali','Omar','Youssef',
-        'Khalid','Ibrahim','Hassan','Hussein','Karim','Saad'
-      ];
-      const lastNames = [
-        'Иванов','Петров','Сидоров','Козлов','Кузнецов','Смирнов','Васильев','Соколов','Михайлов','Федоров',
-        'Smith','Jones','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson','Thomas','Jackson','White',
-        'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Lewis','Ali','Khan','Ahmed','Mohamed',
-        'Hassan','Hussein','Ibrahim','Khalid','Omar','Youssef','Karim'
-      ];
-
-      for (let i = 0; i < 100; i++) {
-        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-        users.push({
-          nickname: generateRandomNickname(firstName, lastName),
-          coins: generateRandomCoins()
-        });
+      const firstNames = ['Иван','Алексей','Мария','Сергей','Ольга','Дмитрий','Никита','Екатерина','Владимир','Анна',
+                          'John','Alice','Bob','Charlie','Елена','Максим','Анастасия','Кирилл','Полина','David','Emily',
+                          'Daniel','Sophia','James','Olivia','William','Ava','Ethan','Isabella','Michael','Mia','Liam',
+                          'Charlotte','Noah','Harper','Aiden','Amelia','Jackson','Evelyn','Matthew','Abigail','Benjamin',
+                          'Sofia','Jayden','Mia','Lucas','Ella','Henry','Chloe','Ahmed','Mohamed','Ali','Omar','Youssef',
+                          'Khalid','Ibrahim','Hassan','Hussein','Karim','Saad'];
+      const lastNames = ['Иванов','Петров','Сидоров','Козлов','Кузнецов','Смирнов','Васильев','Соколов','Михайлов','Федоров',
+                         'Smith','Jones','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson','Thomas','Jackson','White',
+                         'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Lewis','Ali','Khan','Ahmed','Mohamed',
+                         'Hassan','Hussein','Ibrahim','Khalid','Omar','Youssef','Karim'];
+      for (let i=0; i<100; i++){
+        const f = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const l = lastNames[Math.floor(Math.random() * lastNames.length)];
+        users.push({ nickname: generateRandomNickname(f,l), coins: generateRandomCoins() });
       }
+      // Лидер
       users[0].coins = 74369512;
       users.sort((a, b) => b.coins - a.coins);
       renderUsersTable();
@@ -787,11 +848,11 @@
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
-      const crowns = [' 👑🥇', ' 👑🥈', ' 👑🥉'];
-      for (let i = 0; i < users.length; i++) {
+      const crowns = [' 👑🥇',' 👑🥈',' 👑🥉'];
+      for(let i=0; i<users.length; i++){
         const tr = document.createElement('tr');
         const rankTd = document.createElement('td');
-        rankTd.textContent = (i + 1) + (i < 3 ? crowns[i] : '');
+        rankTd.textContent = (i+1) + (i<3 ? crowns[i] : '');
         const nicknameTd = document.createElement('td');
         nicknameTd.textContent = users[i].nickname;
         const coinsTd = document.createElement('td');
@@ -806,35 +867,33 @@
       const adjectives = ['Speedy','Mighty','Epic','Legendary','Crazy','Ninja','Heroic','Swift','Fierce'];
       const numbers = ['1','2','3','4','5','6','7','8','9'];
       const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-      const number = numbers[Math.floor(Math.random() * numbers.length)];
-      return adj + firstName + number + lastName;
+      const num = numbers[Math.floor(Math.random() * numbers.length)];
+      return adj + firstName + num + lastName;
     }
     function generateRandomCoins() {
-      return Math.floor(Math.random() * 10000000) + 1000;
+      return Math.floor(Math.random()*10000000) + 1000;
     }
-
-    // Автоувеличение участников + обновление таблицы
     function startParticipantsUpdater() {
       let participants = parseInt(localStorage.getItem('participants')) || 17369;
       const infoElem = document.getElementById('participants-info');
-      if (!infoElem) {
-        const dashboard = document.getElementById('dashboard-popup');
+      if(!infoElem){
+        const dash = document.getElementById('dashboard-popup');
         const p = document.createElement('div');
         p.className = 'participants-info';
         p.id = 'participants-info';
         p.textContent = 'Total participants: ' + participants.toLocaleString();
-        dashboard.insertBefore(p, dashboard.querySelector('table'));
+        dash.insertBefore(p, dash.querySelector('table'));
       }
-      setInterval(() => {
-        participants += Math.floor(Math.random() * 3) + 1;
+      setInterval(()=>{
+        participants += Math.floor(Math.random()*3)+1;
         localStorage.setItem('participants', participants);
         document.getElementById('participants-info').textContent = 
           'Total participants: ' + participants.toLocaleString();
-
-        for (let i = 0; i < 3; i++) {
-          users[i].coins += Math.floor(Math.random() * 50000);
+        // немного апгрейд топ-3
+        for (let i=0; i<3; i++){
+          users[i].coins += Math.floor(Math.random()*50000);
         }
-        users.sort((a, b) => b.coins - a.coins);
+        users.sort((a,b)=>b.coins - a.coins);
         renderUsersTable();
       }, 10000);
     }
@@ -843,25 +902,25 @@
     function loadShopItems() {
       const shopList = document.getElementById('shop-list');
       shopList.innerHTML = '';
-      upgrades.forEach((upgrade) => {
-        const listItem = document.createElement('li');
-        const button = document.createElement('button');
-        button.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} ARCC)`;
-        button.onclick = () => {
-          if (clickCount >= upgrade.cost && !upgrade.purchased) {
+      upgrades.forEach((upgrade)=>{
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} ARCC)`;
+        btn.onclick = () => {
+          if(clickCount >= upgrade.cost && !upgrade.purchased){
             clickCount -= upgrade.cost;
             clickIncrement += upgrade.increment;
             upgrade.purchased = true;
             document.getElementById('coins').textContent = clickCount;
-            button.disabled = true;
+            btn.disabled = true;
             saveGameState();
           }
         };
-        if (upgrade.purchased) {
-          button.disabled = true;
+        if(upgrade.purchased){
+          btn.disabled = true;
         }
-        listItem.appendChild(button);
-        shopList.appendChild(listItem);
+        li.appendChild(btn);
+        shopList.appendChild(li);
       });
     }
 
@@ -869,19 +928,19 @@
     function loadLevelRequirements() {
       const levelsList = document.getElementById('levels-list');
       levelsList.innerHTML = '';
-      levelRequirements.forEach((req, index) => {
-        const listItem = document.createElement('li');
-        listItem.style.color = levelColors[index] || '#FFFFFF';
-        listItem.textContent = `Level ${req.level} (${levelNames[index]}) : ${req.coins} ARCC`;
-        listItem.onclick = () => {
-          const description = document.getElementById('level-description');
-          const levelImg = document.getElementById('level-image');
-          const levelTxt = document.getElementById('level-text');
-          levelImg.src = levelBackgrounds[index] || '';
-          levelTxt.textContent = levelDescriptions[index] || '';
-          description.style.display = 'flex';
+      levelRequirements.forEach((req, idx)=>{
+        const li = document.createElement('li');
+        li.style.color = levelColors[idx] || '#fff';
+        li.textContent = `Level ${req.level} (${levelNames[idx]}): ${req.coins} ARCC`;
+        li.onclick = () => {
+          const desc = document.getElementById('level-description');
+          const lvlImg = document.getElementById('level-image');
+          const lvlTxt = document.getElementById('level-text');
+          lvlImg.src = levelBackgrounds[idx] || '';
+          lvlTxt.textContent = levelDescriptions[idx] || '';
+          desc.style.display = 'flex';
         };
-        levelsList.appendChild(listItem);
+        levelsList.appendChild(li);
       });
     }
 
@@ -889,14 +948,13 @@
     function loadTasks() {
       const tasksList = document.getElementById('tasks-list');
       tasksList.innerHTML = '';
-      tasks.forEach((task, index) => {
+      tasks.forEach((task)=>{
         const li = document.createElement('li');
-        li.style.marginBottom = '10px';
-        li.style.fontSize = '12px';
+        li.style.marginBottom = '5px';
         li.textContent = `${task.name} — Reward: ${task.reward} ARCC`;
         li.onclick = () => {
-          if (task.completed) return;
-          if (checkTaskCompletion(task.name)) {
+          if(task.completed) return;
+          if(checkTaskCompletion(task.name)){
             clickCount += task.reward;
             document.getElementById('coins').textContent = clickCount;
             task.completed = true;
@@ -911,41 +969,37 @@
       });
     }
     function checkTaskCompletion(taskName) {
-      switch (taskName) {
-        case 'Click 100 times':
-          return (clickCount >= 100);
-        case 'Buy your first upgrade':
-          return upgrades.some(u => u.purchased === true);
-        case 'Reach level 3':
-          return (level >= 3);
-        case 'Click 1000 times':
-          return (clickCount >= 1000);
-        case 'Invite a friend':
-          return (clickCount >= 500);
-        default:
-          return false;
+      switch(taskName){
+        case 'Click 100 times': return (clickCount>=100);
+        case 'Buy your first upgrade': return upgrades.some(u=>u.purchased===true);
+        case 'Reach level 3': return (level>=3);
+        case 'Click 1000 times': return (clickCount>=1000);
+        case 'Invite a friend': return (clickCount>=500);
+        default: return false;
       }
     }
 
-    // Смена цвета прогресс-бара, уровня и фона при апе уровня
+    // Смена цвета и фона при новом уровне
     function updateLevelColor() {
-      const color = levelColors[level - 1] || '#FFFFFF';
+      const color = levelColors[level - 1] || '#fff';
       const background = levelBackgrounds[level - 1] || '';
-      document.getElementById('progress').style.background = color;
-      document.getElementById('level-container').style.color = color;
-      document.getElementById('level-container').style.borderColor = color;
-      // Если есть coinRing — меняем цвет кольца
-      if (coinRing) {
-        coinRing.material.color.set(color);
-      }
 
+      // Прогресс
+      document.getElementById('progress').style.background = color;
+      // Имя пользователя — цвет уровня
+      document.getElementById('username-display').style.color = color;
+      // Блок уровня — цвет текста
+      document.getElementById('level-container').style.color = color;
+
+      // Текст уровня
       document.getElementById('current-level').textContent = level;
 
+      // Меняем фон плавно
       if (background) {
         const overlay = document.getElementById('background-overlay');
         overlay.style.backgroundImage = `url('${background}')`;
         overlay.style.opacity = 1;
-        setTimeout(() => {
+        setTimeout(()=>{
           document.body.style.background = `url('${background}') no-repeat center center fixed`;
           document.body.style.backgroundSize = 'cover';
           overlay.style.opacity = 0;
@@ -953,84 +1007,36 @@
       }
     }
 
-    function isClickOnCoin(event) {
-      const rect = renderer.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left - rect.width / 2;
-      const y = event.clientY - rect.top - rect.height / 2;
-      const distance = Math.sqrt(x * x + y * y);
-      return distance < 200; 
-    }
-
-    function spawnPlusText(text) {
-      const plusSpan = document.createElement('span');
-      plusSpan.className = 'plus-text';
-      plusSpan.textContent = `+${text}`;
-      const { width, height } = renderer.domElement.getBoundingClientRect();
-      plusSpan.style.left = `${width / 2 - 20 + (Math.random() * 40 - 20)}px`;
-      plusSpan.style.top = `${height / 2 - 200 + (Math.random() * 30 - 15)}px`;
-
-      document.body.appendChild(plusSpan);
-      setTimeout(() => {
-        if (plusSpan.parentNode) {
-          plusSpan.parentNode.removeChild(plusSpan);
-        }
-      }, 1500);
-    }
-
-    function animateCoinScale(targetScale, duration) {
-      const initialScale = coin.scale.x;
-      const scaleDifference = targetScale - initialScale;
-      const startTime = performance.now();
-
-      function anim() {
-        const elapsed = performance.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const newScale = initialScale + scaleDifference * progress;
-        coin.scale.set(newScale, newScale, newScale);
-        if (coinRing) coinRing.scale.set(newScale, newScale, newScale);
-        if (progress < 1) requestAnimationFrame(anim);
-      }
-      anim();
-    }
-
-    function showLevelUpAnimation(newLevel) {
-      const levelUpPopup = document.getElementById('level-up');
-      levelUpPopup.style.borderColor = levelColors[newLevel - 1] || '#fff';
-      levelUpPopup.textContent = `Congratulations! Level ${newLevel}`;
-      levelUpPopup.classList.add('show');
-      setTimeout(() => {
-        levelUpPopup.classList.remove('show');
-      }, 3000);
-    }
-
+    // Клик по монете
     function onCoinClick(event) {
       if (!isClickOnCoin(event)) return;
 
-      // Мигаем
-      renderer.domElement.style.filter = 'brightness(2)';
-      setTimeout(() => {
-        renderer.domElement.style.filter = 'brightness(1)';
-      }, 200);
+      // Играем звук клика монеты (если включён)
+      if(soundEnabled) {
+        coinClickSound.currentTime = 0;
+        coinClickSound.play().catch(()=>{});
+      }
+      // Вибрация при клике (если включена и поддерживается)
+      if(vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate(50);
+      }
 
-      // Блик
+      // Вспышка
       const highlight = document.getElementById('coin-highlight');
       const rect = renderer.domElement.getBoundingClientRect();
       highlight.style.left = `${event.clientX - rect.left - 150}px`;
       highlight.style.top = `${event.clientY - rect.top - 150}px`;
       highlight.style.display = 'block';
-      setTimeout(() => {
-        highlight.style.display = 'none';
-      }, 600);
+      setTimeout(() => { highlight.style.display = 'none'; }, 600);
 
-      // Анимация прижатия
-      animateCoinScale(1.2, 50);
+      // Анимация масштаба (убрали brightness(2) и прочие эффекты, чтобы не дёргался фон)
+      animateCoinScale(1.1, 50);
       setTimeout(() => animateCoinScale(1.0, 50), 50);
-      setTimeout(() => animateCoinScale(0.9, 50), 100);
 
-      // Плюс текст
+      // Плюс-текст
       spawnPlusText(clickIncrement);
 
-      // Добавить монеты
+      // Начисляем монеты
       clickCount += clickIncrement;
       document.getElementById('coins').textContent = clickCount;
       document.getElementById('maxcoins').textContent = nextLevelCoins;
@@ -1038,27 +1044,76 @@
 
       saveGameState();
     }
+    function isClickOnCoin(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      const distance = Math.sqrt(x*x + y*y);
+      // 200 пикселей — условный радиус области клика
+      return distance < 200;
+    }
+    function animateCoinScale(targetScale, duration){
+      const initialScale = coin.scale.x;
+      const diff = targetScale - initialScale;
+      const startTime = performance.now();
 
+      function anim(){
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed/duration, 1);
+        const newScale = initialScale + diff*progress;
+        coin.scale.set(newScale, newScale, newScale);
+        if(progress < 1) requestAnimationFrame(anim);
+      }
+      anim();
+    }
+
+    function spawnPlusText(value) {
+      const plusSpan = document.createElement('span');
+      plusSpan.className = 'plus-text';
+      plusSpan.textContent = `+${value}`;
+      const { width, height } = renderer.domElement.getBoundingClientRect();
+      plusSpan.style.left = `${width/2 - 20 + (Math.random()*40-20)}px`;
+      plusSpan.style.top = `${height/2 - 200 + (Math.random()*30-15)}px`;
+      document.body.appendChild(plusSpan);
+      setTimeout(()=>{
+        if(plusSpan.parentNode){
+          plusSpan.parentNode.removeChild(plusSpan);
+        }
+      },1500);
+    }
+
+    // Прогресс
     function updateProgress() {
-      const progressPercent = (clickCount / nextLevelCoins) * 100;
+      const progressPercent = (clickCount / nextLevelCoins)*100;
       document.getElementById('progress').style.width = `${progressPercent}%`;
-
-      if (clickCount >= nextLevelCoins) {
+      if(clickCount >= nextLevelCoins){
         level++;
         showLevelUpAnimation(level);
-        const nextLevel = levelRequirements.find(req => req.level === level);
-        nextLevelCoins = nextLevel ? nextLevel.coins : nextLevelCoins * 2;
+        const nextLvl = levelRequirements.find(req=>req.level===level);
+        nextLevelCoins = nextLvl ? nextLvl.coins : nextLevelCoins*2;
         document.getElementById('maxcoins').textContent = nextLevelCoins;
         updateLevelColor();
-        loadTasks(); // обновим список задач
+        loadTasks(); // обновить задачу "Reach level ...", если нужно
       }
     }
 
+    function showLevelUpAnimation(newLevel){
+      const levelUpPopup = document.getElementById('level-up');
+      levelUpPopup.style.borderColor = levelColors[newLevel-1] || '#fff';
+      levelUpPopup.textContent = `Congratulations! Level ${newLevel}`;
+      levelUpPopup.classList.add('show');
+      setTimeout(() => {
+        levelUpPopup.classList.remove('show');
+      }, 3000);
+    }
+
+    // Анимация
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     }
 
+    // Запуск
     init();
   </script>
 </body>
