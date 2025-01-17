@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <style>
-    /* Сброс / базовые стили */
+    /* Сброс + базовые стили */
     html, body {
       margin: 0; padding: 0;
       width: 100%; height: 100%;
@@ -49,7 +49,7 @@
       100% { content: "Loading"; }
     }
     .loading-text {
-      font-size: 12px; /* Сделали меньше */
+      font-size: 12px; 
     }
     .loading-text::after {
       font-family: 'Press Start 2P', cursive;
@@ -64,20 +64,7 @@
       color: #ffec99;
     }
 
-    /* Отображение имени пользователя (из TG) слева вверху */
-    #username-display {
-      position: absolute;
-      top: 10px; left: 10px;
-      font-size: 14px;
-      z-index: 9999;
-      pointer-events: none;
-      background: rgba(0,0,0,0.4);
-      padding: 5px 8px;
-      border-radius: 10px;
-      transition: color 0.5s ease; /* Будем менять цвет под уровень */
-    }
-
-    /* Фоновый оверлей для плавной смены */
+    /* Оверлей для плавной смены фона */
     #background-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -130,14 +117,32 @@
       height: 100%;
     }
 
-    /* Блок для уровня (фон как у прогресс-бара, текст цветной) */
+    /* Блок уровня (справа) */
     #level-container {
-      background: #444;    /* Фон как у прогресс-бара */
-      color: #fff;         /* Будет меняться на цвет уровня через JS */
+      position: absolute;
+      top: 58px; /* Сместили ниже прогресс-бара */
+      right: 20px; /* правее */
+      background: #444;  
+      color: #fff;       
       border-radius: 8px;
       padding: 4px 10px;
       font-size: 14px;
       transition: color 0.5s ease;
+      z-index: 10;
+    }
+
+    /* Имя пользователя (слева, чуть ниже прогресс-бара) */
+    #username-display {
+      position: absolute;
+      top: 58px;    /* тоже 58px, чтобы быть на одной высоте с level, но слева */
+      left: 20px;
+      font-size: 10px; /* меньше шрифт */
+      background: rgba(0,0,0,0.4);
+      padding: 3px 6px;
+      border-radius: 8px;
+      z-index: 10;
+      transition: color 0.5s ease;
+      display: none; /* покажем после загрузки */
     }
 
     /* CANVAS */
@@ -148,7 +153,7 @@
       z-index: 1;
     }
 
-    /* Всплывающий +x при клике */
+    /* Всплывающий +x */
     .plus-text {
       position: absolute;
       color: #ffff99;
@@ -163,10 +168,10 @@
       100% { opacity: 0; transform: translateY(-100px); }
     }
 
-    /* Футер с иконками (поднимаем выше) */
+    /* Футер с иконками (кнопки) */
     #footer {
       position: fixed;
-      bottom: 100px; /* Подняли выше */
+      bottom: 100px; 
       display: flex; 
       justify-content: center; 
       align-items: center;
@@ -175,7 +180,6 @@
       box-sizing: border-box;
       z-index: 9999;
     }
-    /* Иконки снизу чуть меньше */
     .icon {
       width: 50px; 
       height: 50px;
@@ -190,7 +194,7 @@
       transform: scale(1.1);
     }
 
-    /* Оверлей-вспышка при клике */
+    /* Вспышка при клике */
     #coin-highlight {
       position: absolute;
       width: 300px; 
@@ -207,7 +211,7 @@
       to   { transform: scale(1.2); opacity: 0; }
     }
 
-    /* Анимация Level Up */
+    /* Level Up анимация */
     #level-up {
       position: fixed;
       top: 20%; left: 50%;
@@ -230,7 +234,7 @@
       opacity: 1;
     }
 
-    /* Попап-окна, делаем меньше (70%) + шрифты поменьше */
+    /* Попапы (общая стилистика) */
     #shop-popup,
     #levels-popup,
     #invite-popup,
@@ -241,11 +245,11 @@
       transform: translate(-50%, -50%) scale(0);
       background: rgba(0, 0, 0, 0.9);
       color: white;
-      padding: 10px; /* меньше */
+      padding: 10px; 
       border-radius: 15px;
       text-align: center;
       z-index: 20;
-      width: 70%; /* было 80-90 */
+      width: 70%; 
       max-height: 80vh;
       overflow-y: auto;
       opacity: 0;
@@ -254,7 +258,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 10px; /* Общий мелкий шрифт */
+      font-size: 10px;
     }
     #shop-popup.active,
     #levels-popup.active,
@@ -264,7 +268,6 @@
       transform: translate(-50%, -50%) scale(1);
       opacity: 1;
     }
-    /* Заголовки попапов чуть меньше */
     #shop-popup h3,
     #levels-popup h3,
     #invite-popup h3,
@@ -273,6 +276,13 @@
       font-size: 12px;
       margin-bottom: 10px;
     }
+
+    /* Специально для dashboard: шире по width и меньше по высоте */
+    #dashboard-popup {
+      width: 85%;        /* чуть шире */
+      max-height: 50vh;  /* ниже */
+    }
+
     /* Списки */
     #shop-popup ul,
     #levels-popup ul,
@@ -286,6 +296,7 @@
       margin: 5px 0;
       cursor: pointer;
     }
+
     /* Описание уровня */
     #level-description {
       margin-top: 5px; 
@@ -300,6 +311,7 @@
       height: 80px;
       margin-bottom: 5px;
     }
+
     /* Кнопки внутри попапов */
     #shop-popup button,
     #levels-popup button,
@@ -322,7 +334,7 @@
       cursor: not-allowed;
     }
 
-    /* Таблица лидеров */
+    /* Таблица в Dashboard */
     #dashboard-popup table {
       width: 100%;
       border-collapse: collapse;
@@ -355,28 +367,7 @@
       font-weight: bold;
     }
 
-    /* Иконки в правом верхнем углу для звука/вибрации */
-    #sound-panel {
-      position: fixed;
-      top: 10px; 
-      right: 10px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .icon-sound {
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      filter: brightness(0) invert(1);
-      transition: transform 0.2s ease;
-    }
-    .icon-sound:hover {
-      transform: scale(1.1);
-    }
-
-    /* Адаптив под узкие экраны */
+    /* Адаптив для узких экранов */
     @media only screen and (max-width: 768px) {
       .progress-bar {
         height: 30px;
@@ -384,17 +375,22 @@
       .progress-text {
         font-size: 10px;
       }
-      #progress-container {
-        top: 5px;
-      }
       #footer {
         bottom: 80px;
+      }
+      .icon {
+        width: 40px; 
+        height: 40px;
+      }
+
+      #dashboard-popup {
+        width: 90%;
+        max-height: 50vh;
       }
       #shop-popup,
       #levels-popup,
       #invite-popup,
-      #tasks-popup,
-      #dashboard-popup {
+      #tasks-popup {
         width: 80%;
         font-size: 9px;
       }
@@ -405,19 +401,13 @@
       #dashboard-popup button {
         font-size: 9px;
       }
-      #username-display {
-        font-size: 12px;
-      }
       #level-container {
         font-size: 12px;
+        top: 55px;
       }
-      .icon {
-        width: 40px; 
-        height: 40px;
-      }
-      .icon-sound {
-        width: 35px;
-        height: 35px;
+      #username-display {
+        font-size: 9px;
+        top: 55px;
       }
     }
   </style>
@@ -432,10 +422,7 @@
   <!-- Фоновый оверлей -->
   <div id="background-overlay"></div>
 
-  <!-- Имя пользователя -->
-  <div id="username-display" style="display: none;">ArcadiaUser</div>
-
-  <!-- Контейнер прогресса -->
+  <!-- Прогресс-бар -->
   <div id="progress-container">
     <div class="progress-bar" id="progress-bar">
       <div class="progress" id="progress"></div>
@@ -443,8 +430,11 @@
         ArcadiaCoin (ARCC): <span id="coins">0</span> / <span id="maxcoins">500</span>
       </div>
     </div>
-    <div id="level-container">Level <span id="current-level">1</span></div>
   </div>
+
+  <!-- Имя пользователя слева, уровень справа -->
+  <div id="username-display">ArcadiaUser</div>
+  <div id="level-container">Level <span id="current-level">1</span></div>
 
   <!-- CANVAS -->
   <canvas id="game-canvas"></canvas>
@@ -458,14 +448,6 @@
     <img id="invite-button" class="icon" src="https://i.ibb.co/ZHkthBy/2025-01-13-180941.png" alt="Invite Friend">
     <img id="tasks-button" class="icon" src="https://i.ibb.co/3TQyPkr/2025-01-13-182825-1.png" alt="Tasks">
     <img id="dashboard-button" class="icon" src="https://i.ibb.co/2SQVGTy/2025-01-13-183834.png" alt="Dashboard">
-  </div>
-
-  <!-- Кнопки звука и вибрации (в правом верхнем углу) -->
-  <div id="sound-panel">
-    <img id="sound-toggle-button" class="icon-sound" 
-         src="https://i.ibb.co/RbXyzYv/sound-on.png" alt="Sound Toggle">
-    <img id="vibration-toggle-button" class="icon-sound"
-         src="https://i.ibb.co/KzLH3xQ/vibration-off.png" alt="Vibration Toggle">
   </div>
 
   <!-- Попапы -->
@@ -513,9 +495,10 @@
     <button id="close-dashboard">Close</button>
   </div>
 
+  <!-- Level Up анимация -->
   <div id="level-up"></div>
 
-  <!-- АУДИО: клики и музыка (примерные ссылки, замените на свои) -->
+  <!-- АУДИО: клики и музыка (замените ссылки на свои файлы, если нужно) -->
   <audio id="coin-click-sound" src="https://yourcdn.com/sounds/coin-click.mp3" preload="auto"></audio>
   <audio id="button-click-sound" src="https://yourcdn.com/sounds/button-click.mp3" preload="auto"></audio>
   <audio id="background-music" src="https://yourcdn.com/sounds/bg-music.mp3" preload="auto" loop></audio>
@@ -528,17 +511,19 @@
     let userId = null;
     let userName = null;
 
+    // Если открыто через Telegram WebApp, получаем данные пользователя
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
       tg = window.Telegram.WebApp;
       tg.expand();
       tg.ready();
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         userId = tg.initDataUnsafe.user.id;
+        // Можно взять username или first_name
         userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
       }
     }
 
-    // Если нет данных о пользователе из ТГ, пусть всё равно не будет Guest — но назовём "ArcadiaUser"
+    // Если нет данных из TG, пусть будет ArcadiaUser
     if (!userName) {
       userName = "ArcadiaUser";
       userId = "arcadia_unknown";
@@ -553,14 +538,11 @@
     let clickIncrement = 1;
     let users = [];
 
-    let soundEnabled = true;
-    let vibrationEnabled = false;
-
     const coinClickSound = document.getElementById('coin-click-sound');
     const buttonClickSound = document.getElementById('button-click-sound');
     const backgroundMusic = document.getElementById('background-music');
 
-    // Уровни, цвета, фоны, описания
+    // Уровни, требования, цвета, фоны, описания
     const levelRequirements = [
       { level: 1, coins: 500 },
       { level: 2, coins: 1000 },
@@ -627,10 +609,10 @@
     ];
 
     function init() {
-      // Показываем ник на экране загрузки
+      // Показать ник на экране загрузки
       document.getElementById('telegram-username').textContent = "Hello, " + userName;
 
-      // После загрузки показываем ник слева вверху
+      // После загрузки покажем ник слева
       document.getElementById('username-display').textContent = userName;
 
       // Загружаем сохранённые данные
@@ -649,7 +631,8 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Монета (больше радиус — 2.0)
+      // Монета (чёткая картинка, радиус 2.0)
+      // При необходимости замените ссылку на свою, более чёткую картинку.
       const coinGeometry = new THREE.CircleGeometry(2.0, 64);
       const coinTexture = new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png');
       const coinMaterial = new THREE.MeshBasicMaterial({
@@ -660,21 +643,19 @@
       coin.position.y = 1.0;
       scene.add(coin);
 
-      // Слушатель клика мышью/тапа
+      // Клик
       renderer.domElement.addEventListener('pointerdown', onCoinClick);
 
-      // Привяжем звуковой клик к кнопкам
+      // Звук клика для кнопок
       const allButtons = document.querySelectorAll('button, .icon');
       allButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-          if (soundEnabled) {
-            buttonClickSound.currentTime = 0;
-            buttonClickSound.play().catch(()=>{});
-          }
+          buttonClickSound.currentTime = 0;
+          buttonClickSound.play().catch(()=>{});
         });
       });
 
-      // Кнопки в интерфейсе
+      // Кнопки внизу
       document.getElementById('shop-button').onclick = () => {
         document.getElementById('shop-popup').classList.add('active');
       };
@@ -700,7 +681,7 @@
         const telegramUrl = `tg://msg?text=${shareText}%20${shareUrl}`;
         window.location.href = telegramUrl;
         setTimeout(() => {
-          // Награда за приглашение
+          // Награда
           clickCount += 500;
           document.getElementById('coins').textContent = clickCount;
           document.getElementById('invite-popup').classList.remove('active');
@@ -720,61 +701,34 @@
         document.getElementById('dashboard-popup').classList.remove('active');
       };
 
-      // Загрузить магазин / уровни / задачи
+      // Заполняем магазин / уровни / задачи
       loadShopItems();
       loadLevelRequirements();
       loadTasks();
 
-      // Цвет и фон уровня
+      // Цвет уровня, фон
       updateLevelColor();
 
-      // Сгенерировать таблицу + автообновление
+      // Генерируем таблицу + автообновление
       generateUsersTable();
       startParticipantsUpdater();
 
       // Слушатель resize
       window.addEventListener('resize', onWindowResize);
 
-      // Запускаем анимацию
+      // Анимация
       animate();
 
-      // Прячем экран загрузки, показываем nickname
+      // Убираем экран загрузки
       setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('username-display').style.display = 'block';
       }, 600);
 
-      // Автовоспроизведение фоновой музыки (может блокироваться браузером без user gesture)
-      // Попробуем запустить после минимального взаимодействия
-      // или добавить кнопку ручного старта. Пока просто:
+      // Фоновая музыка
       backgroundMusic.volume = 0.4;
-      try {
-        backgroundMusic.play().catch(()=>{});
-      } catch(e) {}
+      backgroundMusic.play().catch(()=>{});
     }
-
-    /* Звук / вибрация - панель справа */
-    const soundToggleBtn = document.getElementById('sound-toggle-button');
-    const vibrationToggleBtn = document.getElementById('vibration-toggle-button');
-    soundToggleBtn.onclick = () => {
-      soundEnabled = !soundEnabled;
-      // Останавливаем или запускаем музыку
-      if (!soundEnabled) {
-        backgroundMusic.pause();
-        soundToggleBtn.src = "https://i.ibb.co/dG5C6ZY/sound-off.png"; // иконка "нет звука"
-      } else {
-        backgroundMusic.play().catch(()=>{});
-        soundToggleBtn.src = "https://i.ibb.co/RbXyzYv/sound-on.png"; // иконка "звук включён"
-      }
-    };
-    vibrationToggleBtn.onclick = () => {
-      vibrationEnabled = !vibrationEnabled;
-      if (vibrationEnabled) {
-        vibrationToggleBtn.src = "https://i.ibb.co/YcfdXxX/vibration-on.png";
-      } else {
-        vibrationToggleBtn.src = "https://i.ibb.co/KzLH3xQ/vibration-off.png";
-      }
-    };
 
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -782,7 +736,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // Сохранение
+    // Сохранение / Загрузка
     function saveGameState() {
       const gameData = {
         clickCount,
@@ -823,33 +777,40 @@
       }
     }
 
-    // Таблица пользователей
+    // Генерация и обновление таблицы
     function generateUsersTable() {
-      const firstNames = ['Иван','Алексей','Мария','Сергей','Ольга','Дмитрий','Никита','Екатерина','Владимир','Анна',
-                          'John','Alice','Bob','Charlie','Елена','Максим','Анастасия','Кирилл','Полина','David','Emily',
-                          'Daniel','Sophia','James','Olivia','William','Ava','Ethan','Isabella','Michael','Mia','Liam',
-                          'Charlotte','Noah','Harper','Aiden','Amelia','Jackson','Evelyn','Matthew','Abigail','Benjamin',
-                          'Sofia','Jayden','Mia','Lucas','Ella','Henry','Chloe','Ahmed','Mohamed','Ali','Omar','Youssef',
-                          'Khalid','Ibrahim','Hassan','Hussein','Karim','Saad'];
-      const lastNames = ['Иванов','Петров','Сидоров','Козлов','Кузнецов','Смирнов','Васильев','Соколов','Михайлов','Федоров',
-                         'Smith','Jones','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson','Thomas','Jackson','White',
-                         'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Lewis','Ali','Khan','Ahmed','Mohamed',
-                         'Hassan','Hussein','Ibrahim','Khalid','Omar','Youssef','Karim'];
-      for (let i=0; i<100; i++){
+      const firstNames = [
+        'Иван','Алексей','Мария','Сергей','Ольга','Дмитрий','Никита','Екатерина','Владимир','Анна',
+        'John','Alice','Bob','Charlie','Елена','Максим','Анастасия','Кирилл','Полина','David','Emily',
+        'Daniel','Sophia','James','Olivia','William','Ava','Ethan','Isabella','Michael','Mia','Liam',
+        'Charlotte','Noah','Harper','Aiden','Amelia','Jackson','Evelyn','Matthew','Abigail','Benjamin',
+        'Sofia','Jayden','Mia','Lucas','Ella','Henry','Chloe','Ahmed','Mohamed','Ali','Omar','Youssef',
+        'Khalid','Ibrahim','Hassan','Hussein','Karim','Saad'
+      ];
+      const lastNames = [
+        'Иванов','Петров','Сидоров','Козлов','Кузнецов','Смирнов','Васильев','Соколов','Михайлов','Федоров',
+        'Smith','Jones','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson','Thomas','Jackson','White',
+        'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Lewis','Ali','Khan','Ahmed','Mohamed',
+        'Hassan','Hussein','Ibrahim','Khalid','Omar','Youssef','Karim'
+      ];
+      for (let i = 0; i < 100; i++) {
         const f = firstNames[Math.floor(Math.random() * firstNames.length)];
         const l = lastNames[Math.floor(Math.random() * lastNames.length)];
-        users.push({ nickname: generateRandomNickname(f,l), coins: generateRandomCoins() });
+        users.push({ 
+          nickname: generateRandomNickname(f, l), 
+          coins: generateRandomCoins() 
+        });
       }
       // Лидер
       users[0].coins = 74369512;
-      users.sort((a, b) => b.coins - a.coins);
+      users.sort((a,b)=> b.coins - a.coins);
       renderUsersTable();
     }
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
       const crowns = [' 👑🥇',' 👑🥈',' 👑🥉'];
-      for(let i=0; i<users.length; i++){
+      for (let i=0; i<users.length; i++) {
         const tr = document.createElement('tr');
         const rankTd = document.createElement('td');
         rankTd.textContent = (i+1) + (i<3 ? crowns[i] : '');
@@ -866,8 +827,8 @@
     function generateRandomNickname(firstName, lastName) {
       const adjectives = ['Speedy','Mighty','Epic','Legendary','Crazy','Ninja','Heroic','Swift','Fierce'];
       const numbers = ['1','2','3','4','5','6','7','8','9'];
-      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-      const num = numbers[Math.floor(Math.random() * numbers.length)];
+      const adj = adjectives[Math.floor(Math.random()*adjectives.length)];
+      const num = numbers[Math.floor(Math.random()*numbers.length)];
       return adj + firstName + num + lastName;
     }
     function generateRandomCoins() {
@@ -884,16 +845,16 @@
         p.textContent = 'Total participants: ' + participants.toLocaleString();
         dash.insertBefore(p, dash.querySelector('table'));
       }
-      setInterval(()=>{
+      setInterval(() => {
         participants += Math.floor(Math.random()*3)+1;
         localStorage.setItem('participants', participants);
         document.getElementById('participants-info').textContent = 
           'Total participants: ' + participants.toLocaleString();
-        // немного апгрейд топ-3
+        // Чуть прокачаем топ-3
         for (let i=0; i<3; i++){
           users[i].coins += Math.floor(Math.random()*50000);
         }
-        users.sort((a,b)=>b.coins - a.coins);
+        users.sort((a,b) => b.coins - a.coins);
         renderUsersTable();
       }, 10000);
     }
@@ -902,12 +863,12 @@
     function loadShopItems() {
       const shopList = document.getElementById('shop-list');
       shopList.innerHTML = '';
-      upgrades.forEach((upgrade)=>{
+      upgrades.forEach((upgrade) => {
         const li = document.createElement('li');
         const btn = document.createElement('button');
         btn.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} ARCC)`;
         btn.onclick = () => {
-          if(clickCount >= upgrade.cost && !upgrade.purchased){
+          if (clickCount >= upgrade.cost && !upgrade.purchased) {
             clickCount -= upgrade.cost;
             clickIncrement += upgrade.increment;
             upgrade.purchased = true;
@@ -916,7 +877,7 @@
             saveGameState();
           }
         };
-        if(upgrade.purchased){
+        if(upgrade.purchased) {
           btn.disabled = true;
         }
         li.appendChild(btn);
@@ -979,27 +940,26 @@
       }
     }
 
-    // Смена цвета и фона при новом уровне
+    // Цвет уровня, фон
     function updateLevelColor() {
       const color = levelColors[level - 1] || '#fff';
       const background = levelBackgrounds[level - 1] || '';
 
       // Прогресс
       document.getElementById('progress').style.background = color;
-      // Имя пользователя — цвет уровня
+      // Имя и уровень — меняем цвет шрифта
       document.getElementById('username-display').style.color = color;
-      // Блок уровня — цвет текста
       document.getElementById('level-container').style.color = color;
 
-      // Текст уровня
+      // Текущий уровень
       document.getElementById('current-level').textContent = level;
 
-      // Меняем фон плавно
+      // Смена фона
       if (background) {
         const overlay = document.getElementById('background-overlay');
         overlay.style.backgroundImage = `url('${background}')`;
         overlay.style.opacity = 1;
-        setTimeout(()=>{
+        setTimeout(() => {
           document.body.style.background = `url('${background}') no-repeat center center fixed`;
           document.body.style.backgroundSize = 'cover';
           overlay.style.opacity = 0;
@@ -1011,15 +971,9 @@
     function onCoinClick(event) {
       if (!isClickOnCoin(event)) return;
 
-      // Играем звук клика монеты (если включён)
-      if(soundEnabled) {
-        coinClickSound.currentTime = 0;
-        coinClickSound.play().catch(()=>{});
-      }
-      // Вибрация при клике (если включена и поддерживается)
-      if(vibrationEnabled && navigator.vibrate) {
-        navigator.vibrate(50);
-      }
+      // Звук клика монеты
+      coinClickSound.currentTime = 0;
+      coinClickSound.play().catch(()=>{});
 
       // Вспышка
       const highlight = document.getElementById('coin-highlight');
@@ -1029,14 +983,14 @@
       highlight.style.display = 'block';
       setTimeout(() => { highlight.style.display = 'none'; }, 600);
 
-      // Анимация масштаба (убрали brightness(2) и прочие эффекты, чтобы не дёргался фон)
+      // Лёгкая анимация масштаба
       animateCoinScale(1.1, 50);
       setTimeout(() => animateCoinScale(1.0, 50), 50);
 
       // Плюс-текст
       spawnPlusText(clickIncrement);
 
-      // Начисляем монеты
+      // Начисляем
       clickCount += clickIncrement;
       document.getElementById('coins').textContent = clickCount;
       document.getElementById('maxcoins').textContent = nextLevelCoins;
@@ -1044,19 +998,20 @@
 
       saveGameState();
     }
+
+    // Уменьшили радиус клика, чтобы не было «глюка» по краям
     function isClickOnCoin(event) {
       const rect = renderer.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left - rect.width / 2;
-      const y = event.clientY - rect.top - rect.height / 2;
+      const x = event.clientX - rect.left - (rect.width / 2);
+      const y = event.clientY - rect.top - (rect.height / 2);
       const distance = Math.sqrt(x*x + y*y);
-      // 200 пикселей — условный радиус области клика
-      return distance < 200;
+      return distance < 120; /* вместо 200 */
     }
+
     function animateCoinScale(targetScale, duration){
       const initialScale = coin.scale.x;
       const diff = targetScale - initialScale;
       const startTime = performance.now();
-
       function anim(){
         const elapsed = performance.now() - startTime;
         const progress = Math.min(elapsed/duration, 1);
@@ -1086,18 +1041,20 @@
     function updateProgress() {
       const progressPercent = (clickCount / nextLevelCoins)*100;
       document.getElementById('progress').style.width = `${progressPercent}%`;
-      if(clickCount >= nextLevelCoins){
+      if (clickCount >= nextLevelCoins) {
         level++;
         showLevelUpAnimation(level);
         const nextLvl = levelRequirements.find(req=>req.level===level);
         nextLevelCoins = nextLvl ? nextLvl.coins : nextLevelCoins*2;
         document.getElementById('maxcoins').textContent = nextLevelCoins;
         updateLevelColor();
-        loadTasks(); // обновить задачу "Reach level ...", если нужно
+        // Обновим задачи (на случай Reach level 3 и т.д.)
+        loadTasks();
       }
     }
 
-    function showLevelUpAnimation(newLevel){
+    // Анимация Level Up
+    function showLevelUpAnimation(newLevel) {
       const levelUpPopup = document.getElementById('level-up');
       levelUpPopup.style.borderColor = levelColors[newLevel-1] || '#fff';
       levelUpPopup.textContent = `Congratulations! Level ${newLevel}`;
@@ -1107,7 +1064,7 @@
       }, 3000);
     }
 
-    // Анимация
+    // Анимация Three.js
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
