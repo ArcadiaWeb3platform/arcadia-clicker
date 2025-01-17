@@ -131,18 +131,17 @@
       z-index: 10;
     }
 
-    /* Имя пользователя (слева, чуть ниже прогресс-бара), стилизуем как #level-container */
+    /* Имя пользователя (слева, чуть ниже прогресс-бара) */
     #username-display {
       position: absolute;
-      top: 58px;
+      top: 58px;    /* тоже 58px, чтобы быть на одной высоте с level, но слева */
       left: 20px;
-      background: #444;
-      color: #fff;
+      font-size: 10px; /* меньше шрифт */
+      background: rgba(0,0,0,0.4);
+      padding: 3px 6px;
       border-radius: 8px;
-      padding: 4px 10px;
-      font-size: 14px;
-      transition: color 0.5s ease;
       z-index: 10;
+      transition: color 0.5s ease;
       display: none; /* покажем после загрузки */
     }
 
@@ -280,7 +279,7 @@
 
     /* Специально для dashboard: шире по width и меньше по высоте */
     #dashboard-popup {
-      width: 90%;        /* чуть шире */
+      width: 85%;        /* чуть шире */
       max-height: 50vh;  /* ниже */
     }
 
@@ -633,6 +632,7 @@
       document.body.appendChild(renderer.domElement);
 
       // Монета (чёткая картинка, радиус 2.0)
+      // При необходимости замените ссылку на свою, более чёткую картинку.
       const coinGeometry = new THREE.CircleGeometry(2.0, 64);
       const coinTexture = new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png');
       const coinMaterial = new THREE.MeshBasicMaterial({
@@ -640,8 +640,7 @@
         transparent: true
       });
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      // Опускаем монету чуть ниже (было 1.0 -> станет 0.5)
-      coin.position.y = 0.5;
+      coin.position.y = 1.0;
       scene.add(coin);
 
       // Клик
@@ -979,9 +978,8 @@
       // Вспышка
       const highlight = document.getElementById('coin-highlight');
       const rect = renderer.domElement.getBoundingClientRect();
-      // Сместим чуть меньше (120, а не 150), чтобы круг был ближе к центру монеты
-      highlight.style.left = `${event.clientX - rect.left - 120}px`;
-      highlight.style.top = `${event.clientY - rect.top - 120}px`;
+      highlight.style.left = `${event.clientX - rect.left - 150}px`;
+      highlight.style.top = `${event.clientY - rect.top - 150}px`;
       highlight.style.display = 'block';
       setTimeout(() => { highlight.style.display = 'none'; }, 600);
 
@@ -1001,13 +999,13 @@
       saveGameState();
     }
 
-    // Уменьшили радиус клика (distance < 120), чтобы не было «глюка» по краям
+    // Уменьшили радиус клика, чтобы не было «глюка» по краям
     function isClickOnCoin(event) {
       const rect = renderer.domElement.getBoundingClientRect();
       const x = event.clientX - rect.left - (rect.width / 2);
       const y = event.clientY - rect.top - (rect.height / 2);
       const distance = Math.sqrt(x*x + y*y);
-      return distance < 120;
+      return distance < 120; /* вместо 200 */
     }
 
     function animateCoinScale(targetScale, duration){
