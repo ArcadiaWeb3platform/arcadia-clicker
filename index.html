@@ -3,18 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <title>Arcadia AI Clicker</title>
+  <!-- МЕТАТЕГИ ДЛЯ АДАПТАЦИИ ПОД МОБИЛЬНЫЕ УСТРОЙСТВА -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <!-- ШРИФТ PIXEL -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    /* Чтобы iOS не изменял размеры шрифта автоматически */
+    html {
+      -webkit-text-size-adjust: none;
+    }
+
+    /* Сброс отступов и скролла */
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      width: 100%;
       height: 100%;
+      overflow: hidden; /* Отключаем прокрутку */
+      font-family: 'Press Start 2P', cursive;
       background: url('https://i.gifer.com/fzUl.gif') no-repeat center center fixed;
       background-size: cover;
-      font-family: 'Press Start 2P', cursive;
       color: #fff;
+      box-sizing: border-box;
     }
+
+    /* ЭКРАН ЗАГРУЗКИ */
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999; /* всегда выше всего */
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      visibility: visible;
+      opacity: 1;
+    }
+    /* Скрываем после загрузки */
+    #loading-screen.hidden {
+      visibility: hidden;
+      opacity: 0;
+    }
+    /* Анимация бегущих точек "Loading..." */
+    @keyframes loadingDots {
+      0%   { content: "Loading"; }
+      25%  { content: "Loading."; }
+      50%  { content: "Loading.."; }
+      75%  { content: "Loading..."; }
+      100% { content: "Loading"; }
+    }
+    .loading-text::after {
+      font-family: 'Press Start 2P', cursive;
+      content: "Loading";
+      animation: loadingDots 2s infinite;
+      white-space: pre;
+      display: inline-block;
+      margin-left: 5px;
+    }
+    /* Никнейм слева под строкой «Loading...» */
+    #telegram-username {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ffec99;
+    }
+
+    /* Фон, перекрывающийся анимацией смены */
     #background-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -26,22 +83,26 @@
       transition: opacity 1s ease;
       z-index: -1;
     }
+
+    /* Прогресс */
     #progress-container {
       position: absolute;
-      top: 20px; left: 50%;
+      top: 10px; 
+      left: 50%;
       transform: translateX(-50%);
       width: 80%;
       z-index: 10;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 5px;
     }
     .progress-bar {
       position: relative;
       border-radius: 15px;
       overflow: hidden;
-      height: 50px; width: 100%;
+      height: 40px; 
+      width: 100%;
       background: #444;
     }
     .progress {
@@ -54,16 +115,29 @@
       position: absolute;
       z-index: 2;
       top: 0; left: 0; right: 0;
-      color: white; font-size: 18px;
+      color: white; 
+      font-size: 12px; /* было 16px */
       pointer-events: none;
-      display: flex; justify-content: center; align-items: center;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
       height: 100%;
     }
-    canvas { display: block; z-index: 1; }
+
+    /* Канвас на заднем плане */
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0; 
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Анимация всплывающих +x монет */
     .plus-text {
       position: absolute;
       color: #ffff99;
-      font-size: 30px;
+      font-size: 20px; /* было 30px */
       font-family: 'Press Start 2P', cursive;
       animation: float 1.5s ease-out forwards;
       pointer-events: none;
@@ -73,32 +147,45 @@
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-100px); }
     }
+
+    /* Футер с иконками */
     #footer {
-      position: absolute;
-      bottom: 50px;
-      display: flex; justify-content: center; align-items: center;
-      gap: 50px; width: 100%; padding: 10px;
-      box-sizing: border-box; z-index: 10;
+      position: fixed; /* чтобы иконки были всегда видны */
+      bottom: 20px;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      gap: 30px;
+      width: 100%;
+      box-sizing: border-box;
+      z-index: 9999;
     }
     .icon {
-      width: 100px; height: 100px;
-      cursor: pointer; transition: transform 0.2s ease;
-      margin-top: -50px; /* Поднимает иконки вверх */
-      display: flex; justify-content: center; align-items: center;
+      width: 60px; /* было 80px */
+      height: 60px;
+      cursor: pointer; 
+      transition: transform 0.2s ease;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
       filter: brightness(0) invert(1);
     }
-    .icon:hover { transform: scale(1.2); }
+    .icon:hover {
+      transform: scale(1.1); /* было 1.2 */
+    }
+
+    /* Попапы */
     #shop-popup,
     #levels-popup,
     #invite-popup,
     #tasks-popup,
     #dashboard-popup {
-      position: absolute;
+      position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%) scale(0);
       background: rgba(0, 0, 0, 0.9);
       color: white;
-      padding: 30px;
+      padding: 20px; /* было 30px */
       border-radius: 15px;
       text-align: center;
       z-index: 20;
@@ -120,6 +207,7 @@
       transform: translate(-50%, -50%) scale(1);
       opacity: 1;
     }
+    /* Стили внутри попапов */
     #shop-popup ul,
     #levels-popup ul,
     #dashboard-popup ul {
@@ -129,22 +217,24 @@
     }
     #shop-popup li,
     #levels-popup li {
-      margin: 15px 0;
+      margin: 10px 0; /* было 15px */
       text-align: center;
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 12px; /* было 14px */
+      line-height: 1.4;
       cursor: pointer;
     }
     #level-description {
-      margin-top: 20px;
+      margin-top: 15px; /* было 20px */
       text-align: center;
-      font-size: 16px;
+      font-size: 12px; /* было 16px */
       display: none;
       flex-direction: column;
       align-items: center;
     }
     #level-description img {
-      width: 150px; height: 150px; margin-bottom: 10px;
+      width: 100px; 
+      height: 100px; 
+      margin-bottom: 10px;
     }
     #shop-popup button,
     #levels-popup button,
@@ -154,19 +244,25 @@
       background: #1E90FF;
       border: none;
       color: white;
-      padding: 15px;
+      padding: 10px; /* было 15px */
       border-radius: 10px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 14px; /* было 16-18px */
       width: 90%;
-      margin-top: 20px;
+      margin-top: 15px; /* было 20px */
       text-align: center;
       font-family: 'Press Start 2P', cursive;
     }
-    #shop-popup button:disabled { background: gray; cursor: not-allowed; }
+    #shop-popup button:disabled {
+      background: gray; 
+      cursor: not-allowed;
+    }
+
+    /* Вспышка при нажатии на монету */
     #coin-highlight {
       position: absolute;
-      width: 400px; height: 400px;
+      width: 300px; /* было 400px */
+      height: 300px;
       border-radius: 50%;
       pointer-events: none;
       z-index: 5;
@@ -176,54 +272,118 @@
     }
     @keyframes glow {
       from { transform: scale(0.8); opacity: 1; }
-      to { transform: scale(1.2); opacity: 0; }
+      to   { transform: scale(1.2); opacity: 0; }
     }
+
+    /* Анимация Level Up */
     #level-up {
       position: fixed;
       top: 20%; left: 50%;
       transform: translateX(-50%) scale(0);
-      padding: 20px 40px;
+      padding: 15px 30px; /* было 20px 40px */
       background: rgba(0, 0, 0, 0.8);
       border: 4px solid;
       border-radius: 15px;
-      font-size: 24px;
+      font-size: 16px; /* было 20px или 24px */
       font-family: 'Press Start 2P', cursive;
       color: #fff;
       z-index: 30;
       opacity: 0;
       transition: transform 0.5s ease, opacity 0.5s ease;
       pointer-events: none;
+      text-align: center;
     }
     #level-up.show {
       transform: translateX(-50%) scale(1);
       opacity: 1;
     }
-    /* Стили для таблицы лидеров и информации об участниках */
+
+    /* Таблица лидеров */
     #dashboard-popup table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 14px;
+      margin-top: 10px; /* было 20px */
+      font-size: 12px;  /* было 14px */
     }
-    #dashboard-popup th, #dashboard-popup td {
-      padding: 10px;
+    #dashboard-popup th,
+    #dashboard-popup td {
+      padding: 8px; /* было 10px */
       border: 1px solid #fff;
     }
-    #dashboard-popup th { background: #1E90FF; }
+    #dashboard-popup th {
+      background: #1E90FF;
+    }
     .participants-info {
       color: lightyellow;
-      font-size: 16px;
+      font-size: 14px; /* было 16px */
       margin-bottom: 10px;
     }
-    .crown { margin-left: 5px; }
+    .crown {
+      margin-left: 5px;
+    }
     /* Выделение первых трёх рядов таблицы */
-    #users-table-body tr:nth-child(1) { background: rgba(255, 215, 0, 0.2); font-weight: bold; }
-    #users-table-body tr:nth-child(2) { background: rgba(192, 192, 192, 0.2); font-weight: bold; }
-    #users-table-body tr:nth-child(3) { background: rgba(173, 216, 230, 0.2); font-weight: bold; }
+    #users-table-body tr:nth-child(1) {
+      background: rgba(255, 215, 0, 0.2); 
+      font-weight: bold;
+    }
+    #users-table-body tr:nth-child(2) {
+      background: rgba(192, 192, 192, 0.2); 
+      font-weight: bold;
+    }
+    #users-table-body tr:nth-child(3) {
+      background: rgba(173, 216, 230, 0.2); 
+      font-weight: bold;
+    }
+
+    /*************************************************************/
+    /*       МЕДИА-ЗАПРОСЫ ДЛЯ ОЧЕНЬ УЗКИХ ЭКРАНОВ (<768px)       */
+    /*************************************************************/
+    @media only screen and (max-width: 768px) {
+      /* Еще сильнее уменьшим иконки и прогресс */
+      .icon {
+        width: 50px;
+        height: 50px;
+      }
+      .progress-bar {
+        height: 35px;
+      }
+      .progress-text {
+        font-size: 10px;
+      }
+      #footer {
+        bottom: 10px;
+        gap: 20px;
+      }
+      /* Можно уменьшить или скорректировать верхний отступ */
+      #progress-container {
+        top: 5px;
+      }
+      #dashboard-popup th, #dashboard-popup td {
+        padding: 6px;
+        font-size: 10px;
+      }
+      /* Попап-кнопки */
+      #shop-popup button,
+      #levels-popup button,
+      #invite-popup button,
+      #tasks-popup button,
+      #dashboard-popup button {
+        padding: 8px;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
+
 <body>
+  <!-- ЭКРАН ЗАГРУЗКИ -->
+  <div id="loading-screen">
+    <div class="loading-text"></div>
+    <div id="telegram-username"></div>
+  </div>
+
   <div id="background-overlay"></div>
+
   <div id="progress-container">
     <div class="progress-bar" id="progress-bar">
       <div class="progress" id="progress"></div>
@@ -234,8 +394,11 @@
       </div>
     </div>
   </div>
+
   <canvas id="game-canvas"></canvas>
+
   <div id="coin-highlight"></div>
+
   <div id="footer">
     <img id="shop-button" class="icon" src="https://i.ibb.co/pyxwmBN/2025-01-13-182401.png" alt="Shop">
     <img id="invite-button" class="icon" src="https://i.ibb.co/ZHkthBy/2025-01-13-180941.png" alt="Invite Friend">
@@ -243,6 +406,7 @@
     <img id="dashboard-button" class="icon" src="https://i.ibb.co/2SQVGTy/2025-01-13-183834.png" alt="Dashboard">
   </div>
 
+  <!-- Попапы -->
   <div id="shop-popup">
     <h3>Upgrade Shop</h3>
     <ul id="shop-list"></ul>
@@ -268,6 +432,7 @@
   <div id="tasks-popup">
     <h3>Tasks</h3>
     <p>Various tasks will be available here for rewards.</p>
+    <ul id="tasks-list"></ul>
     <button id="close-tasks">Close</button>
   </div>
 
@@ -283,7 +448,7 @@
         </tr>
       </thead>
       <tbody id="users-table-body">
-        <!-- Таблица заполняется через JS -->
+        <!-- Заполняется через JS -->
       </tbody>
     </table>
     <button id="close-dashboard">Close</button>
@@ -291,70 +456,148 @@
 
   <div id="level-up"></div>
 
+  <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Telegram WebApp объект (если нужно - вызывать отдельно в боте)
+       В реальном боте достаточно window.Telegram уже будет доступен -->
+  <script>
+    // Если Telegram WebApp доступен, инициализируем
+    let tg = null;
+    let userId = 'guest';
+    let userName = 'Guest';
+    if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+      tg = window.Telegram.WebApp;
+      tg.expand();
+      tg.ready();
+      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        userId = tg.initDataUnsafe.user.id;
+        userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
+      }
+    }
+  </script>
+
   <script>
     let scene, camera, renderer, coin;
     let clickCount = 0;
     let level = 1;
     let nextLevelCoins = 500;
-
-    const levelRequirements = [
-      { level: 1, coins: 500 }, { level: 2, coins: 1000 },
-      { level: 3, coins: 10000 }, { level: 4, coins: 50000 },
-      { level: 5, coins: 100000 }, { level: 6, coins: 200000 },
-      { level: 7, coins: 500000 }, { level: 8, coins: 1000000 },
-      { level: 9, coins: 10000000 }, { level: 10, coins: 50000000 }
-    ];
-    const levelColors = ['#0088cc','#6B5B95','#88B04B','#F7CAC9','#92A8D1','#955251','#B565A7','#009B77','#DD4124','#45B8AC'];
-    const levelBackgrounds = [
-      'https://i.gifer.com/fzUl.gif','https://i.gifer.com/EPts.gif','https://i.gifer.com/ZLm5.gif',
-      'https://i.gifer.com/23YN.gif','https://i.gifer.com/WBVi.gif','https://i.gifer.com/I5zb.gif',
-      'https://i.gifer.com/2YcW.gif','https://i.gifer.com/2swA.gif','https://i.gifer.com/fyrV.gif',
-      'https://i.gifer.com/Q81V.gif'
-    ];
-    const levelNames = ['Beginner','Apprentice','Advanced','Expert','Master','Grandmaster','Legend','Immortal','Divine','Celestial'];
-    const levelDescriptions = [
-      'Starting level, learning the basics.','First steps on the path of mastery.',
-      'Continuing to improve skills.','Expert level achieved.',
-      'Becoming a master of the craft.','Mastering the art of clicking.',
-      'You are a legendary clicker!','Immortals reach the peaks!',
-      'You are almost divine!','Celestial level of clicking in the universe!'
-    ];
-    const upgrades = [
-      { cost: 100, increment: 2, purchased: false },
-      { cost: 10000, increment: 3, purchased: false },
-      { cost: 50000, increment: 4, purchased: false },
-      { cost: 150000, increment: 5, purchased: false },
-      { cost: 1000000, increment: 10, purchased: false },
-    ];
     let clickIncrement = 1;
     let users = [];
 
+    // Уровни, их требования, цвета, фоны, описания
+    const levelRequirements = [
+      { level: 1, coins: 500 },
+      { level: 2, coins: 1000 },
+      { level: 3, coins: 10000 },
+      { level: 4, coins: 50000 },
+      { level: 5, coins: 100000 },
+      { level: 6, coins: 200000 },
+      { level: 7, coins: 500000 },
+      { level: 8, coins: 1000000 },
+      { level: 9, coins: 10000000 },
+      { level: 10, coins: 50000000 }
+    ];
+    const levelColors = [
+      '#0088cc', '#6B5B95', '#88B04B', '#F7CAC9', '#92A8D1',
+      '#955251', '#B565A7', '#009B77', '#DD4124', '#45B8AC'
+    ];
+    const levelBackgrounds = [
+      'https://i.gifer.com/fzUl.gif',
+      'https://i.gifer.com/EPts.gif',
+      'https://i.gifer.com/ZLm5.gif',
+      'https://i.gifer.com/23YN.gif',
+      'https://i.gifer.com/WBVi.gif',
+      'https://i.gifer.com/I5zb.gif',
+      'https://i.gifer.com/2YcW.gif',
+      'https://i.gifer.com/2swA.gif',
+      'https://i.gifer.com/fyrV.gif',
+      'https://i.gifer.com/Q81V.gif'
+    ];
+    const levelNames = [
+      'Beginner', 'Apprentice', 'Advanced', 'Expert', 'Master',
+      'Grandmaster', 'Legend', 'Immortal', 'Divine', 'Celestial'
+    ];
+    const levelDescriptions = [
+      'Starting level, learning the basics.',
+      'First steps on the path of mastery.',
+      'Continuing to improve skills.',
+      'Expert level achieved.',
+      'Becoming a master of the craft.',
+      'Mastering the art of clicking.',
+      'You are a legendary clicker!',
+      'Immortals reach the peaks!',
+      'You are almost divine!',
+      'Celestial level of clicking in the universe!'
+    ];
+
+    // Новый набор апгрейдов
+    const upgrades = [
+      { cost: 100,       increment: 2,  purchased: false },
+      { cost: 1000,      increment: 3,  purchased: false },
+      { cost: 5000,      increment: 4,  purchased: false },
+      { cost: 15000,     increment: 5,  purchased: false },
+      { cost: 100000,    increment: 10, purchased: false },
+      { cost: 500000,    increment: 20, purchased: false },
+      { cost: 1000000,   increment: 30, purchased: false },
+    ];
+
+    // Пример задач
+    const tasks = [
+      { name: 'Click 100 times', reward: 150, completed: false },
+      { name: 'Buy your first upgrade', reward: 300, completed: false },
+      { name: 'Reach level 3', reward: 500, completed: false },
+      { name: 'Click 1000 times', reward: 1000, completed: false },
+      { name: 'Invite a friend', reward: 500, completed: false },
+    ];
+
+    // ИНИЦИАЛИЗАЦИЯ
     function init() {
+      // Отображаем ник в экране загрузки (если есть)
+      document.getElementById('telegram-username').textContent = userName !== 'Guest'
+        ? `Hello, ${userName}`
+        : 'Guest mode';
+
+      // Пытаемся загрузить сохранение из localStorage
+      loadGameState();
+
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
+      // Подальше камеру, чтобы монета была меньше
+      camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 6; // было 5
+
       renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
+
       document.body.appendChild(renderer.domElement);
 
-      const coinGeometry = new THREE.CircleGeometry(1.5, 64);
+      // Геометрия монеты (уменьшим радиус)
+      const coinGeometry = new THREE.CircleGeometry(1.2, 64); // было 1.5
       const coinMaterial = new THREE.MeshBasicMaterial({
         map: new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png'),
         transparent: true
       });
+
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      coin.position.y = 0.5;
+      coin.position.y = 1.0; // поднимаем монету чуть выше
       scene.add(coin);
 
+      // Событие клика по канвасу
       renderer.domElement.addEventListener('pointerdown', onCoinClick);
 
+      // Кнопки
       document.getElementById('shop-button').onclick = () => {
         document.getElementById('shop-popup').classList.add('active');
       };
       document.getElementById('close-shop').onclick = () => {
         document.getElementById('shop-popup').classList.remove('active');
       };
+
       document.getElementById('progress-container').onclick = () => {
         document.getElementById('levels-popup').classList.add('active');
       };
@@ -362,6 +605,7 @@
         document.getElementById('levels-popup').classList.remove('active');
         document.getElementById('level-description').style.display = 'none';
       };
+
       document.getElementById('invite-button').onclick = () => {
         document.getElementById('invite-popup').classList.add('active');
       };
@@ -369,22 +613,27 @@
         document.getElementById('invite-popup').classList.remove('active');
       };
       document.getElementById('invite-action').onclick = () => {
+        // Пригласить через Telegram
         const shareText = encodeURIComponent("Join Arcadia AI Clicker!");
         const shareUrl = encodeURIComponent(window.location.href);
         const telegramUrl = `tg://msg?text=${shareText}%20${shareUrl}`;
         window.location.href = telegramUrl;
         setTimeout(() => {
-          clickCount += 100;
+          // Награда за приглашение
+          clickCount += 500;
           document.getElementById('coins').textContent = clickCount;
           document.getElementById('invite-popup').classList.remove('active');
+          saveGameState();
         }, 1000);
       };
+
       document.getElementById('tasks-button').onclick = () => {
         document.getElementById('tasks-popup').classList.add('active');
       };
       document.getElementById('close-tasks').onclick = () => {
         document.getElementById('tasks-popup').classList.remove('active');
       };
+
       document.getElementById('dashboard-button').onclick = () => {
         document.getElementById('dashboard-popup').classList.add('active');
       };
@@ -392,27 +641,105 @@
         document.getElementById('dashboard-popup').classList.remove('active');
       };
 
+      // Заполняем магазин и список уровней / заданий
       loadShopItems();
       loadLevelRequirements();
+      loadTasks();
+
+      // Настраиваем цвет и фон для текущего уровня
       updateLevelColor();
 
+      // Генерируем таблицу пользователей
       generateUsersTable();
       startParticipantsUpdater();
 
+      // Подключаемся к событию resize, чтобы канвас всегда подстраивался
+      window.addEventListener('resize', onWindowResize);
+
+      // Анимация
       animate();
+
+      // Скроем экран загрузки
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+      }, 800);
     }
 
+    // Подгоняем размер канваса под окно
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ЗАГРУЗКА И СОХРАНЕНИЕ (с учётом userId, если есть)
+    function saveGameState() {
+      const gameData = {
+        clickCount,
+        level,
+        nextLevelCoins,
+        clickIncrement,
+        upgrades,
+        tasks
+      };
+      localStorage.setItem('ArcadiaAI_' + userId, JSON.stringify(gameData));
+    }
+    function loadGameState() {
+      const data = localStorage.getItem('ArcadiaAI_' + userId);
+      if (data) {
+        const gameData = JSON.parse(data);
+        clickCount      = gameData.clickCount      || 0;
+        level           = gameData.level           || 1;
+        nextLevelCoins  = gameData.nextLevelCoins  || 500;
+        clickIncrement  = gameData.clickIncrement  || 1;
+        if (gameData.upgrades) {
+          upgrades.forEach((upg, i) => {
+            if (gameData.upgrades[i]) {
+              upg.cost = gameData.upgrades[i].cost;
+              upg.increment = gameData.upgrades[i].increment;
+              upg.purchased = gameData.upgrades[i].purchased;
+            }
+          });
+        }
+        if (gameData.tasks) {
+          tasks.forEach((task, i) => {
+            if (gameData.tasks[i]) {
+              task.name = gameData.tasks[i].name;
+              task.reward = gameData.tasks[i].reward;
+              task.completed = gameData.tasks[i].completed;
+            }
+          });
+        }
+      }
+    }
+
+    // Генерация таблицы пользователей (тестовые данные)
     function generateUsersTable() {
-      const firstNames = ['Иван', 'Алексей', 'Мария', 'Сергей', 'Ольга', 'Дмитрий', 'Никита', 'Екатерина', 'Владимир', 'Анна',
-                         'John', 'Alice', 'Bob', 'Charlie', 'Елена', 'Максим', 'Анастасия', 'Кирилл', 'Полина', 'David', 'Emily',
-                         'Daniel', 'Sophia', 'James', 'Olivia', 'William', 'Ava', 'Ethan', 'Isabella', 'Michael', 'Mia', 'Liam',
-                         'Charlotte', 'Noah', 'Harper', 'Aiden', 'Amelia', 'Jackson', 'Evelyn', 'Matthew', 'Abigail', 'Benjamin',
-                         'Sofia', 'Jayden', 'Mia', 'Lucas', 'Ella', 'Henry', 'Chloe', 'Ahmed', 'Mohamed', 'Ali', 'Omar', 'Youssef',
-                         'Khalid', 'Ibrahim', 'Hassan', 'Hussein', 'Karim', 'Saad'];
-      const lastNames = ['Иванов', 'Петров', 'Сидоров', 'Козлов', 'Кузнецов', 'Смирнов', 'Васильев', 'Соколов', 'Михайлов', 'Федоров',
-                         'Smith', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas',
-                         'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Lewis',
-                         'Ali', 'Khan', 'Ahmed', 'Mohamed', 'Hassan', 'Hussein', 'Ibrahim', 'Khalid', 'Omar', 'Youssef', 'Karim'];
+      const firstNames = [
+        'Иван', 'Алексей', 'Мария', 'Сергей', 'Ольга',
+        'Дмитрий', 'Никита', 'Екатерина', 'Владимир', 'Анна',
+        'John', 'Alice', 'Bob', 'Charlie', 'Елена', 'Максим',
+        'Анастасия', 'Кирилл', 'Полина', 'David', 'Emily',
+        'Daniel', 'Sophia', 'James', 'Olivia', 'William',
+        'Ava', 'Ethan', 'Isabella', 'Michael', 'Mia', 'Liam',
+        'Charlotte', 'Noah', 'Harper', 'Aiden', 'Amelia',
+        'Jackson', 'Evelyn', 'Matthew', 'Abigail', 'Benjamin',
+        'Sofia', 'Jayden', 'Mia', 'Lucas', 'Ella', 'Henry',
+        'Chloe', 'Ahmed', 'Mohamed', 'Ali', 'Omar', 'Youssef',
+        'Khalid', 'Ibrahim', 'Hassan', 'Hussein', 'Karim', 'Saad'
+      ];
+      const lastNames = [
+        'Иванов', 'Петров', 'Сидоров', 'Козлов', 'Кузнецов',
+        'Смирнов', 'Васильев', 'Соколов', 'Михайлов', 'Федоров',
+        'Smith', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson',
+        'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White',
+        'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez',
+        'Robinson', 'Clark', 'Lewis', 'Ali', 'Khan', 'Ahmed',
+        'Mohamed', 'Hassan', 'Hussein', 'Ibrahim', 'Khalid', 'Omar',
+        'Youssef', 'Karim'
+      ];
+
+      // Заполняем список пользователей рандомно
       for (let i = 0; i < 100; i++) {
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
@@ -421,23 +748,31 @@
           coins: generateRandomCoins()
         });
       }
+
+      // Демонстрация первого места
       users[0].coins = 74369512;
+      // Сортируем
       users.sort((a, b) => b.coins - a.coins);
       renderUsersTable();
     }
 
+    // Рендер таблицы
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
       const crowns = [' 👑🥇', ' 👑🥈', ' 👑🥉'];
       for (let i = 0; i < users.length; i++) {
         const tr = document.createElement('tr');
+
         const rankTd = document.createElement('td');
         rankTd.textContent = (i + 1) + (i < 3 ? crowns[i] : '');
+
         const nicknameTd = document.createElement('td');
         nicknameTd.textContent = users[i].nickname;
+
         const coinsTd = document.createElement('td');
         coinsTd.textContent = users[i].coins.toLocaleString();
+
         tr.appendChild(rankTd);
         tr.appendChild(nicknameTd);
         tr.appendChild(coinsTd);
@@ -457,6 +792,7 @@
       return Math.floor(Math.random() * 10000000) + 1000;
     }
 
+    // Автоматическое увеличение количества участников + обновление монет лидеров
     function startParticipantsUpdater() {
       let participants = parseInt(localStorage.getItem('participants')) || 17369;
       const infoElem = document.getElementById('participants-info');
@@ -471,7 +807,9 @@
       setInterval(() => {
         participants += Math.floor(Math.random() * 3) + 1;
         localStorage.setItem('participants', participants);
-        document.getElementById('participants-info').textContent = 'Total participants: ' + participants.toLocaleString();
+        document.getElementById('participants-info').textContent = 
+          'Total participants: ' + participants.toLocaleString();
+        
         // Увеличиваем монеты у первых 3 пользователей
         for (let i = 0; i < 3; i++) {
           users[i].coins += Math.floor(Math.random() * 50000);
@@ -481,99 +819,17 @@
       }, 10000); // обновление каждые 10 секунд
     }
 
-    function shineCoin() {
-      renderer.domElement.style.filter = 'brightness(2)';
-      setTimeout(() => { renderer.domElement.style.filter = 'brightness(1)'; }, 200);
-    }
-    function updateLevelColor() {
-      const color = levelColors[level - 1] || '#FFFFFF';
-      const background = levelBackgrounds[level - 1] || '';
-      document.getElementById('progress').style.background = color;
-      document.getElementById('current-level').textContent = level;
-      if(background) {
-        const overlay = document.getElementById('background-overlay');
-        overlay.style.backgroundImage = `url('${background}')`;
-        overlay.style.opacity = 1;
-        setTimeout(() => {
-          document.body.style.background = `url('${background}') no-repeat center center fixed`;
-          document.body.style.backgroundSize = 'cover';
-          overlay.style.opacity = 0;
-        }, 1000);
-      }
-    }
-    function isClickOnCoin(event) {
-      const rect = renderer.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left - rect.width / 2;
-      const y = event.clientY - rect.top - rect.height / 2;
-      const distance = Math.sqrt(x * x + y * y);
-      return distance < 250;
-    }
-    function spawnPlusText(text) {
-      const plusSpan = document.createElement('span');
-      plusSpan.className = 'plus-text';
-      plusSpan.textContent = `+${text}`;
-      const { width, height } = renderer.domElement.getBoundingClientRect();
-      plusSpan.style.left = `${width / 2 - 20 + (Math.random() * 40 - 20)}px`;
-      plusSpan.style.top = `${height / 2 - 200 + (Math.random() * 30 - 15)}px`;
-      document.body.appendChild(plusSpan);
-      setTimeout(() => { if (plusSpan.parentNode) plusSpan.parentNode.removeChild(plusSpan); }, 1500);
-    }
-    function animateCoinScale(targetScale, duration) {
-      const initialScale = coin.scale.x;
-      const scaleDifference = targetScale - initialScale;
-      const startTime = performance.now();
-      function animate() {
-        const elapsed = performance.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const newScale = initialScale + scaleDifference * progress;
-        coin.scale.set(newScale, newScale, newScale);
-        if (progress < 1) requestAnimationFrame(animate);
-      }
-      animate();
-    }
-    function showLevelUpAnimation(newLevel) {
-      const levelUpPopup = document.getElementById('level-up');
-      levelUpPopup.style.borderColor = levelColors[newLevel - 1] || '#fff';
-      levelUpPopup.textContent = `Congratulations! Level ${newLevel}`;
-      levelUpPopup.classList.add('show');
-      setTimeout(() => { levelUpPopup.classList.remove('show'); }, 3000);
-    }
-    function onCoinClick(event) {
-      if (!isClickOnCoin(event)) return;
-      shineCoin();
-      const highlight = document.getElementById('coin-highlight');
-      const rect = renderer.domElement.getBoundingClientRect();
-      highlight.style.left = `${event.clientX - rect.left - 200}px`;
-      highlight.style.top = `${event.clientY - rect.top - 200}px`;
-      highlight.style.display = 'block';
-      setTimeout(() => { highlight.style.display = 'none'; }, 600);
-      animateCoinScale(1.3, 50);
-      setTimeout(() => animateCoinScale(1.1, 50), 50);
-      setTimeout(() => animateCoinScale(1.0, 50), 100);
-      spawnPlusText(clickIncrement);
-      clickCount += clickIncrement;
-      document.getElementById('coins').textContent = clickCount;
-      document.getElementById('maxcoins').textContent = nextLevelCoins;
-      updateProgress();
-    }
-    function updateProgress() {
-      const progressPercent = (clickCount / nextLevelCoins) * 100;
-      document.getElementById('progress').style.width = `${progressPercent}%`;
-      if (clickCount >= nextLevelCoins) {
-        level++;
-        showLevelUpAnimation(level);
-        const nextLevel = levelRequirements.find(req => req.level === level);
-        nextLevelCoins = nextLevel ? nextLevel.coins : nextLevelCoins * 2;
-        document.getElementById('maxcoins').textContent = nextLevelCoins;
-        updateLevelColor();
-      }
-    }
+    // Магазин
     function loadShopItems() {
       const shopList = document.getElementById('shop-list');
+      shopList.innerHTML = '';
+
       upgrades.forEach((upgrade) => {
         const listItem = document.createElement('li');
         const button = document.createElement('button');
-        button.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} Arcadia Coins)`;
+        button.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} ARCC)`;
+
+        // Покупка
         button.onclick = () => {
           if (clickCount >= upgrade.cost && !upgrade.purchased) {
             clickCount -= upgrade.cost;
@@ -581,14 +837,23 @@
             upgrade.purchased = true;
             document.getElementById('coins').textContent = clickCount;
             button.disabled = true;
+            saveGameState();
           }
         };
+
+        if (upgrade.purchased) {
+          button.disabled = true;
+        }
+
         listItem.appendChild(button);
         shopList.appendChild(listItem);
       });
     }
+
+    // Уровни
     function loadLevelRequirements() {
       const levelsList = document.getElementById('levels-list');
+      levelsList.innerHTML = '';
       levelRequirements.forEach((req, index) => {
         const listItem = document.createElement('li');
         listItem.style.color = levelColors[index] || '#FFFFFF';
@@ -604,10 +869,191 @@
         levelsList.appendChild(listItem);
       });
     }
+
+    // Задачи
+    function loadTasks() {
+      const tasksList = document.getElementById('tasks-list');
+      tasksList.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '10px';
+        li.style.fontSize = '12px';
+        li.textContent = `${task.name} — Reward: ${task.reward} ARCC`;
+        li.onclick = () => {
+          // Если задача уже выполнена, ничего не делаем
+          if (task.completed) return;
+          // Условно проверим, выполнена ли задача
+          if (checkTaskCompletion(task.name)) {
+            // Награда
+            clickCount += task.reward;
+            document.getElementById('coins').textContent = clickCount;
+            task.completed = true;
+            li.style.color = 'gray';
+            li.style.textDecoration = 'line-through';
+            saveGameState();
+          } else {
+            alert('You have not completed this task yet!');
+          }
+        };
+        tasksList.appendChild(li);
+      });
+    }
+
+    // Пример проверки условий задачи
+    function checkTaskCompletion(taskName) {
+      switch (taskName) {
+        case 'Click 100 times':
+          return (clickCount >= 100);
+        case 'Buy your first upgrade':
+          return upgrades.some(u => u.purchased === true);
+        case 'Reach level 3':
+          return (level >= 3);
+        case 'Click 1000 times':
+          return (clickCount >= 1000);
+        case 'Invite a friend':
+          // Условно проверим, если +500 монет уже заработали приглашением
+          return (clickCount >= 500);
+        default:
+          return false;
+      }
+    }
+
+    // Смена цвета прогресс-бара и смена фона при достижении уровня
+    function updateLevelColor() {
+      const color = levelColors[level - 1] || '#FFFFFF';
+      const background = levelBackgrounds[level - 1] || '';
+      document.getElementById('progress').style.background = color;
+      document.getElementById('current-level').textContent = level;
+      if (background) {
+        const overlay = document.getElementById('background-overlay');
+        overlay.style.backgroundImage = `url('${background}')`;
+        overlay.style.opacity = 1;
+        setTimeout(() => {
+          document.body.style.background = `url('${background}') no-repeat center center fixed`;
+          document.body.style.backgroundSize = 'cover';
+          overlay.style.opacity = 0;
+        }, 1000);
+      }
+    }
+
+    // Проверка клика по монете
+    function isClickOnCoin(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      // радиус поменьше из-за уменьшенной монеты
+      const distance = Math.sqrt(x * x + y * y);
+      return distance < 200; // было 250
+    }
+
+    // +x всплывающее
+    function spawnPlusText(text) {
+      const plusSpan = document.createElement('span');
+      plusSpan.className = 'plus-text';
+      plusSpan.textContent = `+${text}`;
+      const { width, height } = renderer.domElement.getBoundingClientRect();
+      plusSpan.style.left = `${width / 2 - 20 + (Math.random() * 40 - 20)}px`;
+      plusSpan.style.top = `${height / 2 - 200 + (Math.random() * 30 - 15)}px`;
+
+      document.body.appendChild(plusSpan);
+      setTimeout(() => {
+        if (plusSpan.parentNode) {
+          plusSpan.parentNode.removeChild(plusSpan);
+        }
+      }, 1500);
+    }
+
+    // Анимация "прижатия" монеты
+    function animateCoinScale(targetScale, duration) {
+      const initialScale = coin.scale.x;
+      const scaleDifference = targetScale - initialScale;
+      const startTime = performance.now();
+
+      function anim() {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const newScale = initialScale + scaleDifference * progress;
+        coin.scale.set(newScale, newScale, newScale);
+        if (progress < 1) requestAnimationFrame(anim);
+      }
+      anim();
+    }
+
+    // Анимация "Level Up!"
+    function showLevelUpAnimation(newLevel) {
+      const levelUpPopup = document.getElementById('level-up');
+      levelUpPopup.style.borderColor = levelColors[newLevel - 1] || '#fff';
+      levelUpPopup.textContent = `Congratulations! Level ${newLevel}`;
+      levelUpPopup.classList.add('show');
+      setTimeout(() => {
+        levelUpPopup.classList.remove('show');
+      }, 3000);
+    }
+
+    // Клик по монете
+    function onCoinClick(event) {
+      if (!isClickOnCoin(event)) return;
+
+      // Моментальное мигание
+      renderer.domElement.style.filter = 'brightness(2)';
+      setTimeout(() => {
+        renderer.domElement.style.filter = 'brightness(1)';
+      }, 200);
+
+      // Эффект блика
+      const highlight = document.getElementById('coin-highlight');
+      const rect = renderer.domElement.getBoundingClientRect();
+      highlight.style.left = `${event.clientX - rect.left - 150}px`; // было 200
+      highlight.style.top = `${event.clientY - rect.top - 150}px`;
+      highlight.style.display = 'block';
+      setTimeout(() => {
+        highlight.style.display = 'none';
+      }, 600);
+
+      // Анимация прижатия
+      animateCoinScale(1.2, 50);  // было 1.3
+      setTimeout(() => animateCoinScale(1.0, 50), 50);
+      setTimeout(() => animateCoinScale(0.9, 50), 100);
+
+      // Плюс текст
+      spawnPlusText(clickIncrement);
+
+      // Добавляем монеты
+      clickCount += clickIncrement;
+      document.getElementById('coins').textContent = clickCount;
+      document.getElementById('maxcoins').textContent = nextLevelCoins;
+      updateProgress();
+
+      // Сохраняем
+      saveGameState();
+    }
+
+    // Обновление прогресса
+    function updateProgress() {
+      const progressPercent = (clickCount / nextLevelCoins) * 100;
+      document.getElementById('progress').style.width = `${progressPercent}%`;
+
+      // Проверка на достижение следующего уровня
+      if (clickCount >= nextLevelCoins) {
+        level++;
+        showLevelUpAnimation(level);
+        const nextLevel = levelRequirements.find(req => req.level === level);
+        nextLevelCoins = nextLevel ? nextLevel.coins : nextLevelCoins * 2;
+        document.getElementById('maxcoins').textContent = nextLevelCoins;
+        updateLevelColor();
+
+        // Проверим задачи (например, reach level 3 и т.д.)
+        loadTasks();
+      }
+    }
+
+    // Основная анимация Three.js
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     }
+
+    // Запуск
     init();
   </script>
 </body>
