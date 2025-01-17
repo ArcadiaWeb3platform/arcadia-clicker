@@ -8,6 +8,9 @@
   <!-- ШРИФТ PIXEL -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
+  <!-- Скрипт Telegram WebApp (важно подключить, чтобы работало tg.initDataUnsafe) -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
     /* Сброс + базовые стили */
     html, body {
@@ -508,30 +511,32 @@
 
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- Telegram WebApp -->
+
+  <!-- Telegram WebApp + основная логика игры -->
   <script>
     let tg = null;
     let userId = null;
     let userName = null;
 
-    // Если открыто через Telegram WebApp
+    // Проверяем, открыто ли в Telegram WebApp
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
       tg = window.Telegram.WebApp;
       tg.expand();
       tg.ready();
+
+      // Если Telegram дал нам данные пользователя
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         userId = tg.initDataUnsafe.user.id;
         userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
       }
     }
 
-    // Если нет данных от Telegram
+    // Если нет данных от Telegram, ставим дефолт
     if (!userName) {
       userName = "ArcadiaUser";
       userId = "arcadia_unknown";
     }
-  </script>
-  <script>
+
     let scene, camera, renderer, coin;
     let clickCount = 0;
     let level = 1;
@@ -614,7 +619,7 @@
       // Показываем ник на экране загрузки
       document.getElementById('telegram-username').textContent = "Hello, " + userName;
 
-      // После загрузки показываем ник слева
+      // После загрузки (init) показываем ник слева
       document.getElementById('username-display').textContent = userName;
 
       // Загружаем сохранённые данные
@@ -633,7 +638,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Монета (радиус 2.0), опускаем ниже (y = 0.6)
+      // Монета
       const coinGeometry = new THREE.CircleGeometry(2.0, 64);
       const coinTexture = new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png');
       const coinMaterial = new THREE.MeshBasicMaterial({
@@ -641,7 +646,7 @@
         transparent: true
       });
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      coin.position.y = 0.6; // стало чуть ниже
+      coin.position.y = 0.6; 
       scene.add(coin);
 
       // Клик по canvas
@@ -677,12 +682,14 @@
         document.getElementById('invite-popup').classList.remove('active');
       };
       document.getElementById('invite-action').onclick = () => {
+        // Открываем телеграм для шаринга
         const shareText = encodeURIComponent("Join Arcadia AI Clicker!");
         const shareUrl = encodeURIComponent(window.location.href);
         const telegramUrl = `tg://msg?text=${shareText}%20${shareUrl}`;
         window.location.href = telegramUrl;
+
+        // Награда (имитация, через секунду)
         setTimeout(() => {
-          // Награда
           clickCount += 500;
           document.getElementById('coins').textContent = clickCount;
           document.getElementById('invite-popup').classList.remove('active');
@@ -1012,11 +1019,9 @@
     // Учитываем, что монета опущена на y=0.6, и уменьшаем радиус клика
     function isClickOnCoin(event) {
       const rect = renderer.domElement.getBoundingClientRect();
-      // Вычислим координаты на канвасе
       const x = event.clientX - rect.left - rect.width / 2;
       const y = event.clientY - rect.top - rect.height / 2;
-      // Корректируем на то, что монета в THREE.JS смещена по Y
-      // но проще уменьшить радиус, чтобы избежать глюков
+      // Подгонка для упрощения
       const distance = Math.sqrt(x*x + (y - (-0.6*rect.height/6))*(y - (-0.6*rect.height/6)));
       return distance < 120;
     }
