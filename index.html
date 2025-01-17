@@ -501,6 +501,11 @@
   <!-- Level Up анимация -->
   <div id="level-up"></div>
 
+  <!-- АУДИО: клики и музыка (замените ссылки на свои файлы) -->
+  <audio id="coin-click-sound" src="https://yourcdn.com/sounds/coin-click.mp3" preload="auto"></audio>
+  <audio id="button-click-sound" src="https://yourcdn.com/sounds/button-click.mp3" preload="auto"></audio>
+  <audio id="background-music" src="https://yourcdn.com/sounds/bg-music.mp3" preload="auto" loop></audio>
+
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Telegram WebApp -->
@@ -514,9 +519,6 @@
       tg = window.Telegram.WebApp;
       tg.expand();
       tg.ready();
-
-      console.log("initDataUnsafe:", tg.initDataUnsafe); // Для отладки
-
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         userId = tg.initDataUnsafe.user.id;
         userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
@@ -529,7 +531,6 @@
       userId = "arcadia_unknown";
     }
   </script>
-
   <script>
     let scene, camera, renderer, coin;
     let clickCount = 0;
@@ -537,6 +538,11 @@
     let nextLevelCoins = 500;
     let clickIncrement = 1;
     let users = [];
+
+    // Аудио
+    const coinClickSound = document.getElementById('coin-click-sound');
+    const buttonClickSound = document.getElementById('button-click-sound');
+    const backgroundMusic = document.getElementById('background-music');
 
     // Уровни, цвета, фоны
     const levelRequirements = [
@@ -635,11 +641,20 @@
         transparent: true
       });
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      coin.position.y = 0.6; // ниже
+      coin.position.y = 0.6; // стало чуть ниже
       scene.add(coin);
 
-      // Слушатель клика по canvas
+      // Клик по canvas
       renderer.domElement.addEventListener('pointerdown', onCoinClick);
+
+      // Звук клика для кнопок
+      const allButtons = document.querySelectorAll('button, .icon');
+      allButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttonClickSound.currentTime = 0;
+          buttonClickSound.play().catch(()=>{});
+        });
+      });
 
       // Кнопки внизу
       document.getElementById('shop-button').onclick = () => {
@@ -661,15 +676,19 @@
       document.getElementById('close-invite').onclick = () => {
         document.getElementById('invite-popup').classList.remove('active');
       };
-
-      // «Invite via Telegram» — просто открываем ссылку tg://, НИЧЕГО не начисляем
       document.getElementById('invite-action').onclick = () => {
         const shareText = encodeURIComponent("Join Arcadia AI Clicker!");
         const shareUrl = encodeURIComponent(window.location.href);
         const telegramUrl = `tg://msg?text=${shareText}%20${shareUrl}`;
         window.location.href = telegramUrl;
+        setTimeout(() => {
+          // Награда
+          clickCount += 500;
+          document.getElementById('coins').textContent = clickCount;
+          document.getElementById('invite-popup').classList.remove('active');
+          saveGameState();
+        }, 1000);
       };
-
       document.getElementById('tasks-button').onclick = () => {
         document.getElementById('tasks-popup').classList.add('active');
       };
@@ -683,7 +702,7 @@
         document.getElementById('dashboard-popup').classList.remove('active');
       };
 
-      // Заполняем магазин / уровни / задачи
+      // Магазин / уровни / задачи
       loadShopItems();
       loadLevelRequirements();
       loadTasks();
@@ -701,11 +720,15 @@
       // Анимация
       animate();
 
-      // Скроем экран загрузки
+      // Убираем экран загрузки
       setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('username-display').style.display = 'block';
       }, 600);
+
+      // Фоновая музыка
+      backgroundMusic.volume = 0.4;
+      backgroundMusic.play().catch(()=>{});
     }
 
     function onWindowResize() {
@@ -714,7 +737,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // Сохранить / Загрузить
+    // Сохранение / Загрузка
     function saveGameState() {
       const gameData = {
         clickCount,
@@ -756,7 +779,6 @@
     }
 
     // Генерация и обновление таблицы
-    let users = [];
     function generateUsersTable() {
       const firstNames = [
         'Иван','Алексей','Мария','Сергей','Ольга','Дмитрий','Никита','Екатерина','Владимир','Анна',
@@ -829,7 +851,7 @@
         localStorage.setItem('participants', participants);
         document.getElementById('participants-info').textContent = 
           'Total participants: ' + participants.toLocaleString();
-
+        // Чуть прокачаем топ-3
         for (let i=0; i<3; i++){
           users[i].coins += Math.floor(Math.random()*50000);
         }
@@ -891,14 +913,12 @@
       tasks.forEach((task, index)=>{
         const li = document.createElement('li');
         li.style.marginBottom = '5px';
-
         // Если уже выполнена, зачёркиваем
         if (task.completed) {
           li.style.color = 'gray';
           li.style.textDecoration = 'line-through';
         }
         li.textContent = `${task.name} — Reward: ${task.reward} ARCC`;
-
         li.onclick = () => {
           // Если задача уже выполнена, ничего не делаем
           if (task.completed) return;
@@ -925,10 +945,7 @@
         case 'Buy your first upgrade': return upgrades.some(u=>u.purchased===true);
         case 'Reach level 3': return (level>=3);
         case 'Click 1000 times': return (clickCount>=1000);
-        case 'Invite a friend':
-          // Не прибавляем монеты; задача выполнится, если мы хотим что-то проверять.
-          // Но реально проверить, что кто-то присоединился, нельзя без рефсистемы
-          return false; // Оставим false, чтобы никогда не выполнялась, либо по другому условию
+        case 'Invite a friend': return (clickCount>=500);
         default: return false;
       }
     }
@@ -964,6 +981,10 @@
     function onCoinClick(event) {
       if (!isClickOnCoin(event)) return;
 
+      // Звук клика монеты
+      coinClickSound.currentTime = 0;
+      coinClickSound.play().catch(()=>{});
+
       // Вспышка
       const highlight = document.getElementById('coin-highlight');
       const rect = renderer.domElement.getBoundingClientRect();
@@ -979,7 +1000,7 @@
       // Плюс-текст
       spawnPlusText(clickIncrement);
 
-      // Начисляем монеты
+      // Начисляем
       clickCount += clickIncrement;
       document.getElementById('coins').textContent = clickCount;
       document.getElementById('maxcoins').textContent = nextLevelCoins;
@@ -991,9 +1012,11 @@
     // Учитываем, что монета опущена на y=0.6, и уменьшаем радиус клика
     function isClickOnCoin(event) {
       const rect = renderer.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left - rect.width/2;
-      const y = event.clientY - rect.top - rect.height/2;
-      // Можно подстраивать, если нужно более точное совпадение
+      // Вычислим координаты на канвасе
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      // Корректируем на то, что монета в THREE.JS смещена по Y
+      // но проще уменьшить радиус, чтобы избежать глюков
       const distance = Math.sqrt(x*x + (y - (-0.6*rect.height/6))*(y - (-0.6*rect.height/6)));
       return distance < 120;
     }
