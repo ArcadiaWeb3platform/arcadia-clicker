@@ -56,6 +56,9 @@
       75%  { content: "Loading..."; }
       100% { content: "Loading"; }
     }
+    .loading-text {
+      font-size: 14px; /* сделаем меньше */
+    }
     .loading-text::after {
       font-family: 'Press Start 2P', cursive;
       content: "Loading";
@@ -63,12 +66,6 @@
       white-space: pre;
       display: inline-block;
       margin-left: 5px;
-    }
-    /* Никнейм слева под строкой «Loading...» */
-    #telegram-username {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #ffec99;
     }
 
     /* Фон, перекрывающийся анимацией смены */
@@ -84,7 +81,7 @@
       z-index: -1;
     }
 
-    /* Прогресс */
+    /* Прогресс + контейнер для Level */
     #progress-container {
       position: absolute;
       top: 10px; 
@@ -116,12 +113,34 @@
       z-index: 2;
       top: 0; left: 0; right: 0;
       color: white; 
-      font-size: 12px; /* было 16px */
+      font-size: 12px; /* еще немного уменьшили */
       pointer-events: none;
       display: flex; 
       justify-content: center; 
       align-items: center;
       height: 100%;
+    }
+
+    /* Контейнер под уровень (вынесен из progress) */
+    #level-container {
+      margin-top: 5px;
+      font-size: 14px;
+    }
+    #current-level {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    /* Имя пользователя в левом верхнем углу */
+    #player-info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 9999;
     }
 
     /* Канвас на заднем плане */
@@ -137,7 +156,7 @@
     .plus-text {
       position: absolute;
       color: #ffff99;
-      font-size: 20px; /* было 30px */
+      font-size: 20px; /* было 30px, уменьшим сильнее */
       font-family: 'Press Start 2P', cursive;
       animation: float 1.5s ease-out forwards;
       pointer-events: none;
@@ -155,14 +174,14 @@
       display: flex; 
       justify-content: center; 
       align-items: center;
-      gap: 30px;
+      gap: 20px; /* чуть меньше */
       width: 100%;
       box-sizing: border-box;
       z-index: 9999;
     }
     .icon {
-      width: 60px; /* было 80px */
-      height: 60px;
+      width: 50px; /* уменьшили (было 60) */
+      height: 50px;
       cursor: pointer; 
       transition: transform 0.2s ease;
       display: flex; 
@@ -171,10 +190,10 @@
       filter: brightness(0) invert(1);
     }
     .icon:hover {
-      transform: scale(1.1); /* было 1.2 */
+      transform: scale(1.1);
     }
 
-    /* Попапы */
+    /* Попапы (сделаем чуть меньше паддинги и т.д.) */
     #shop-popup,
     #levels-popup,
     #invite-popup,
@@ -185,11 +204,11 @@
       transform: translate(-50%, -50%) scale(0);
       background: rgba(0, 0, 0, 0.9);
       color: white;
-      padding: 20px; /* было 30px */
+      padding: 15px; /* было 20-30px, уменьшим */
       border-radius: 15px;
       text-align: center;
       z-index: 20;
-      width: 90%;
+      width: 85%; /* чуть уменьшили */
       max-height: 80vh;
       overflow-y: auto;
       opacity: 0;
@@ -217,23 +236,23 @@
     }
     #shop-popup li,
     #levels-popup li {
-      margin: 10px 0; /* было 15px */
+      margin: 10px 0;
       text-align: center;
-      font-size: 12px; /* было 14px */
+      font-size: 12px; 
       line-height: 1.4;
       cursor: pointer;
     }
     #level-description {
-      margin-top: 15px; /* было 20px */
+      margin-top: 10px;
       text-align: center;
-      font-size: 12px; /* было 16px */
+      font-size: 12px;
       display: none;
       flex-direction: column;
       align-items: center;
     }
     #level-description img {
-      width: 100px; 
-      height: 100px; 
+      width: 80px; 
+      height: 80px; 
       margin-bottom: 10px;
     }
     #shop-popup button,
@@ -244,12 +263,12 @@
       background: #1E90FF;
       border: none;
       color: white;
-      padding: 10px; /* было 15px */
+      padding: 10px; 
       border-radius: 10px;
       cursor: pointer;
-      font-size: 14px; /* было 16-18px */
+      font-size: 14px; 
       width: 90%;
-      margin-top: 15px; /* было 20px */
+      margin-top: 10px;
       text-align: center;
       font-family: 'Press Start 2P', cursive;
     }
@@ -261,7 +280,7 @@
     /* Вспышка при нажатии на монету */
     #coin-highlight {
       position: absolute;
-      width: 300px; /* было 400px */
+      width: 300px; /* было 300, можно оставить */
       height: 300px;
       border-radius: 50%;
       pointer-events: none;
@@ -280,11 +299,11 @@
       position: fixed;
       top: 20%; left: 50%;
       transform: translateX(-50%) scale(0);
-      padding: 15px 30px; /* было 20px 40px */
+      padding: 15px 30px; 
       background: rgba(0, 0, 0, 0.8);
       border: 4px solid;
       border-radius: 15px;
-      font-size: 16px; /* было 20px или 24px */
+      font-size: 16px; 
       font-family: 'Press Start 2P', cursive;
       color: #fff;
       z-index: 30;
@@ -302,12 +321,12 @@
     #dashboard-popup table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px; /* было 20px */
-      font-size: 12px;  /* было 14px */
+      margin-top: 10px; 
+      font-size: 12px;
     }
     #dashboard-popup th,
     #dashboard-popup td {
-      padding: 8px; /* было 10px */
+      padding: 8px;
       border: 1px solid #fff;
     }
     #dashboard-popup th {
@@ -315,7 +334,7 @@
     }
     .participants-info {
       color: lightyellow;
-      font-size: 14px; /* было 16px */
+      font-size: 14px;
       margin-bottom: 10px;
     }
     .crown {
@@ -339,10 +358,9 @@
     /*       МЕДИА-ЗАПРОСЫ ДЛЯ ОЧЕНЬ УЗКИХ ЭКРАНОВ (<768px)       */
     /*************************************************************/
     @media only screen and (max-width: 768px) {
-      /* Еще сильнее уменьшим иконки и прогресс */
       .icon {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
       }
       .progress-bar {
         height: 35px;
@@ -352,9 +370,8 @@
       }
       #footer {
         bottom: 10px;
-        gap: 20px;
+        gap: 10px;
       }
-      /* Можно уменьшить или скорректировать верхний отступ */
       #progress-container {
         top: 5px;
       }
@@ -362,7 +379,6 @@
         padding: 6px;
         font-size: 10px;
       }
-      /* Попап-кнопки */
       #shop-popup button,
       #levels-popup button,
       #invite-popup button,
@@ -379,19 +395,23 @@
   <!-- ЭКРАН ЗАГРУЗКИ -->
   <div id="loading-screen">
     <div class="loading-text"></div>
-    <div id="telegram-username"></div>
   </div>
 
   <div id="background-overlay"></div>
+
+  <!-- Имя пользователя в левом верхнем углу -->
+  <div id="player-info">Guest</div>
 
   <div id="progress-container">
     <div class="progress-bar" id="progress-bar">
       <div class="progress" id="progress"></div>
       <div class="progress-text" id="progress-text">
         <span>ArcadiaCoin (ARCC): <span id="coins">0</span> / <span id="maxcoins">500</span></span>
-        &nbsp;|&nbsp;
-        <span>Level: <span id="current-level">1</span></span>
       </div>
+    </div>
+    <!-- Level отдельно ниже -->
+    <div id="level-container">
+      Level: <span id="current-level">1</span>
     </div>
   </div>
 
@@ -459,10 +479,15 @@
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <!-- Telegram WebApp объект (если нужно - вызывать отдельно в боте)
-       В реальном боте достаточно window.Telegram уже будет доступен -->
+  <!-- Точка входа -->
   <script>
-    // Если Telegram WebApp доступен, инициализируем
+    // Функция для разбора query-параметров (достаём ?username=...)
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // Если Telegram WebApp доступен, инициализируем (как пример)
     let tg = null;
     let userId = 'guest';
     let userName = 'Guest';
@@ -473,6 +498,12 @@
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         userId = tg.initDataUnsafe.user.id;
         userName = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name;
+      }
+    } else {
+      // Проверяем, не пришёл ли username через ?username=...
+      const paramUser = getQueryParam('username');
+      if (paramUser) {
+        userName = paramUser;
       }
     }
   </script>
@@ -553,41 +584,39 @@
 
     // ИНИЦИАЛИЗАЦИЯ
     function init() {
-      // Отображаем ник в экране загрузки (если есть)
-      document.getElementById('telegram-username').textContent = userName !== 'Guest'
-        ? `Hello, ${userName}`
-        : 'Guest mode';
+      // Ставим ник в левом верхнем углу
+      document.getElementById('player-info').textContent = userName || 'Guest';
 
       // Пытаемся загрузить сохранение из localStorage
       loadGameState();
 
       scene = new THREE.Scene();
-      // Подальше камеру, чтобы монета была меньше
       camera = new THREE.PerspectiveCamera(
         75,
         window.innerWidth / window.innerHeight,
         0.1,
         1000
       );
-      camera.position.z = 6; // было 5
+      camera.position.z = 6; // чуть дальше
 
       renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-
       document.body.appendChild(renderer.domElement);
 
-      // Геометрия монеты (уменьшим радиус)
-      const coinGeometry = new THREE.CircleGeometry(1.2, 64); // было 1.5
+      // Геометрия монеты (сделаем её крупнее)
+      const coinGeometry = new THREE.CircleGeometry(1.6, 64); // радиус побольше
+      const coinTexture = new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png');
       const coinMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load('https://i.ibb.co/6ggc9pF/garold-1000-x-1000.png'),
+        map: coinTexture,
         transparent: true
       });
-
       coin = new THREE.Mesh(coinGeometry, coinMaterial);
-      coin.position.y = 1.0; // поднимаем монету чуть выше
+      coin.position.y = 1.0;
       scene.add(coin);
 
-      // Событие клика по канвасу
+      // Начально сделаем обводку монеты в соответствии с уровнем
+      updateCoinBorder();
+
       renderer.domElement.addEventListener('pointerdown', onCoinClick);
 
       // Кнопки
@@ -641,22 +670,15 @@
         document.getElementById('dashboard-popup').classList.remove('active');
       };
 
-      // Заполняем магазин и список уровней / заданий
       loadShopItems();
       loadLevelRequirements();
       loadTasks();
-
-      // Настраиваем цвет и фон для текущего уровня
       updateLevelColor();
-
-      // Генерируем таблицу пользователей
       generateUsersTable();
       startParticipantsUpdater();
 
-      // Подключаемся к событию resize, чтобы канвас всегда подстраивался
       window.addEventListener('resize', onWindowResize);
 
-      // Анимация
       animate();
 
       // Скроем экран загрузки
@@ -665,14 +687,14 @@
       }, 800);
     }
 
-    // Подгоняем размер канваса под окно
+    // Подгоняем размер канваса
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // ЗАГРУЗКА И СОХРАНЕНИЕ (с учётом userId, если есть)
+    // ЗАГРУЗКА И СОХРАНЕНИЕ
     function saveGameState() {
       const gameData = {
         clickCount,
@@ -713,7 +735,7 @@
       }
     }
 
-    // Генерация таблицы пользователей (тестовые данные)
+    // Таблица пользователей (фейковые данные)
     function generateUsersTable() {
       const firstNames = [
         'Иван', 'Алексей', 'Мария', 'Сергей', 'Ольга',
@@ -739,7 +761,6 @@
         'Youssef', 'Karim'
       ];
 
-      // Заполняем список пользователей рандомно
       for (let i = 0; i < 100; i++) {
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
@@ -751,16 +772,14 @@
 
       // Демонстрация первого места
       users[0].coins = 74369512;
-      // Сортируем
       users.sort((a, b) => b.coins - a.coins);
       renderUsersTable();
     }
 
-    // Рендер таблицы
     function renderUsersTable() {
       const tbody = document.getElementById('users-table-body');
       tbody.innerHTML = '';
-      const crowns = [' 👑🥇', ' 👑🥈', ' 👑🥉'];
+      const crowns = [' \u{1F451}\u{1F947}', ' \u{1F451}\u{1F948}', ' \u{1F451}\u{1F949}'];
       for (let i = 0; i < users.length; i++) {
         const tr = document.createElement('tr');
 
@@ -779,7 +798,6 @@
         tbody.appendChild(tr);
       }
     }
-
     function generateRandomNickname(firstName, lastName) {
       const adjectives = ['Speedy', 'Mighty', 'Epic', 'Legendary', 'Crazy', 'Ninja', 'Heroic', 'Swift', 'Fierce'];
       const numbers = ['1','2','3','4','5','6','7','8','9'];
@@ -787,12 +805,10 @@
       const number = numbers[Math.floor(Math.random() * numbers.length)];
       return adj + firstName + number + lastName;
     }
-
     function generateRandomCoins() {
       return Math.floor(Math.random() * 10000000) + 1000;
     }
-
-    // Автоматическое увеличение количества участников + обновление монет лидеров
+    // Автоматическое увеличение количества участников
     function startParticipantsUpdater() {
       let participants = parseInt(localStorage.getItem('participants')) || 17369;
       const infoElem = document.getElementById('participants-info');
@@ -816,20 +832,17 @@
         }
         users.sort((a, b) => b.coins - a.coins);
         renderUsersTable();
-      }, 10000); // обновление каждые 10 секунд
+      }, 10000);
     }
 
     // Магазин
     function loadShopItems() {
       const shopList = document.getElementById('shop-list');
       shopList.innerHTML = '';
-
       upgrades.forEach((upgrade) => {
         const listItem = document.createElement('li');
         const button = document.createElement('button');
         button.textContent = `+${upgrade.increment} ARCC (Cost: ${upgrade.cost} ARCC)`;
-
-        // Покупка
         button.onclick = () => {
           if (clickCount >= upgrade.cost && !upgrade.purchased) {
             clickCount -= upgrade.cost;
@@ -840,11 +853,9 @@
             saveGameState();
           }
         };
-
         if (upgrade.purchased) {
           button.disabled = true;
         }
-
         listItem.appendChild(button);
         shopList.appendChild(listItem);
       });
@@ -880,11 +891,8 @@
         li.style.fontSize = '12px';
         li.textContent = `${task.name} — Reward: ${task.reward} ARCC`;
         li.onclick = () => {
-          // Если задача уже выполнена, ничего не делаем
           if (task.completed) return;
-          // Условно проверим, выполнена ли задача
           if (checkTaskCompletion(task.name)) {
-            // Награда
             clickCount += task.reward;
             document.getElementById('coins').textContent = clickCount;
             task.completed = true;
@@ -898,8 +906,6 @@
         tasksList.appendChild(li);
       });
     }
-
-    // Пример проверки условий задачи
     function checkTaskCompletion(taskName) {
       switch (taskName) {
         case 'Click 100 times':
@@ -911,19 +917,20 @@
         case 'Click 1000 times':
           return (clickCount >= 1000);
         case 'Invite a friend':
-          // Условно проверим, если +500 монет уже заработали приглашением
           return (clickCount >= 500);
         default:
           return false;
       }
     }
 
-    // Смена цвета прогресс-бара и смена фона при достижении уровня
+    // Смена цвета прогресс-бара, смена фона + обводка монеты
     function updateLevelColor() {
       const color = levelColors[level - 1] || '#FFFFFF';
       const background = levelBackgrounds[level - 1] || '';
       document.getElementById('progress').style.background = color;
+      document.getElementById('current-level').style.color = color;
       document.getElementById('current-level').textContent = level;
+      
       if (background) {
         const overlay = document.getElementById('background-overlay');
         overlay.style.backgroundImage = `url('${background}')`;
@@ -934,16 +941,67 @@
           overlay.style.opacity = 0;
         }, 1000);
       }
+
+      // Меняем обводку монеты
+      updateCoinBorder();
     }
 
-    // Проверка клика по монете
+    // Обновляем обводку монеты (используем MeshBasicMaterial с однотонным цветом и текстурой?)
+    // Здесь сделаем через CSS-подобный хак: создадим "вторую" круглую плоскость чуть больше.
+    function updateCoinBorder() {
+      // Удалим предыдущую "обводку", если есть
+      const borderMesh = scene.getObjectByName('coinBorderMesh');
+      if (borderMesh) {
+        scene.remove(borderMesh);
+      }
+
+      const borderColor = levelColors[level - 1] || '#FFFFFF';
+      // Создаем чуть бОльший радиус
+      const borderGeometry = new THREE.RingGeometry(1.65, 1.85, 64);
+      const borderMaterial = new THREE.MeshBasicMaterial({ color: borderColor });
+      const ring = new THREE.Mesh(borderGeometry, borderMaterial);
+      ring.position.set(coin.position.x, coin.position.y, coin.position.z - 0.01);
+      ring.name = 'coinBorderMesh';
+      scene.add(ring);
+    }
+
+    // Клик по монете
+    function onCoinClick(event) {
+      if (!isClickOnCoin(event)) return;
+
+      renderer.domElement.style.filter = 'brightness(2)';
+      setTimeout(() => {
+        renderer.domElement.style.filter = 'brightness(1)';
+      }, 200);
+
+      const highlight = document.getElementById('coin-highlight');
+      const rect = renderer.domElement.getBoundingClientRect();
+      highlight.style.left = `${event.clientX - rect.left - 150}px`;
+      highlight.style.top = `${event.clientY - rect.top - 150}px`;
+      highlight.style.display = 'block';
+      setTimeout(() => {
+        highlight.style.display = 'none';
+      }, 600);
+
+      animateCoinScale(1.2, 50);  
+      setTimeout(() => animateCoinScale(1.0, 50), 50);
+      setTimeout(() => animateCoinScale(0.9, 50), 100);
+
+      spawnPlusText(clickIncrement);
+
+      clickCount += clickIncrement;
+      document.getElementById('coins').textContent = clickCount;
+      document.getElementById('maxcoins').textContent = nextLevelCoins;
+      updateProgress();
+      saveGameState();
+    }
     function isClickOnCoin(event) {
       const rect = renderer.domElement.getBoundingClientRect();
       const x = event.clientX - rect.left - rect.width / 2;
       const y = event.clientY - rect.top - rect.height / 2;
-      // радиус поменьше из-за уменьшенной монеты
       const distance = Math.sqrt(x * x + y * y);
-      return distance < 200; // было 250
+      // Учитывая что радиус монеты ~1.6 в threejs, на экране это ~200 пикселей
+      return distance < 200;
     }
 
     // +x всплывающее
@@ -968,7 +1026,6 @@
       const initialScale = coin.scale.x;
       const scaleDifference = targetScale - initialScale;
       const startTime = performance.now();
-
       function anim() {
         const elapsed = performance.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
@@ -990,50 +1047,11 @@
       }, 3000);
     }
 
-    // Клик по монете
-    function onCoinClick(event) {
-      if (!isClickOnCoin(event)) return;
-
-      // Моментальное мигание
-      renderer.domElement.style.filter = 'brightness(2)';
-      setTimeout(() => {
-        renderer.domElement.style.filter = 'brightness(1)';
-      }, 200);
-
-      // Эффект блика
-      const highlight = document.getElementById('coin-highlight');
-      const rect = renderer.domElement.getBoundingClientRect();
-      highlight.style.left = `${event.clientX - rect.left - 150}px`; // было 200
-      highlight.style.top = `${event.clientY - rect.top - 150}px`;
-      highlight.style.display = 'block';
-      setTimeout(() => {
-        highlight.style.display = 'none';
-      }, 600);
-
-      // Анимация прижатия
-      animateCoinScale(1.2, 50);  // было 1.3
-      setTimeout(() => animateCoinScale(1.0, 50), 50);
-      setTimeout(() => animateCoinScale(0.9, 50), 100);
-
-      // Плюс текст
-      spawnPlusText(clickIncrement);
-
-      // Добавляем монеты
-      clickCount += clickIncrement;
-      document.getElementById('coins').textContent = clickCount;
-      document.getElementById('maxcoins').textContent = nextLevelCoins;
-      updateProgress();
-
-      // Сохраняем
-      saveGameState();
-    }
-
     // Обновление прогресса
     function updateProgress() {
       const progressPercent = (clickCount / nextLevelCoins) * 100;
       document.getElementById('progress').style.width = `${progressPercent}%`;
 
-      // Проверка на достижение следующего уровня
       if (clickCount >= nextLevelCoins) {
         level++;
         showLevelUpAnimation(level);
@@ -1041,16 +1059,8 @@
         nextLevelCoins = nextLevel ? nextLevel.coins : nextLevelCoins * 2;
         document.getElementById('maxcoins').textContent = nextLevelCoins;
         updateLevelColor();
-
-        // Проверим задачи (например, reach level 3 и т.д.)
-        loadTasks();
+        loadTasks(); 
       }
-    }
-
-    // Основная анимация Three.js
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
     }
 
     // Запуск
