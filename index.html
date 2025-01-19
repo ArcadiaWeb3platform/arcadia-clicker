@@ -615,6 +615,22 @@
       { name: 'Invite a friend', reward: 500, completed: false },
     ];
 
+    // ==========================
+    //  Дополнительные функции для ограничения "один раз в день"
+    // ==========================
+    function canShareToday() {
+      const lastShare = localStorage.getItem('lastShareDate_' + userId);
+      if (!lastShare) return true; // ещё не делали share
+      const today = new Date().toLocaleDateString();
+      return (lastShare !== today); // если дата не совпадает, можно
+    }
+
+    function setShareToday() {
+      const today = new Date().toLocaleDateString();
+      localStorage.setItem('lastShareDate_' + userId, today);
+    }
+    // ==========================
+
     function init() {
       // Показываем ник на экране загрузки
       document.getElementById('telegram-username').textContent = "Hello, " + userName;
@@ -681,7 +697,17 @@
       document.getElementById('close-invite').onclick = () => {
         document.getElementById('invite-popup').classList.remove('active');
       };
+
+      // ==========================
+      //  Модифицированная кнопка Invite
+      // ==========================
       document.getElementById('invite-action').onclick = () => {
+        // Проверяем, можем ли получить бонус сегодня
+        if (!canShareToday()) {
+          alert("You have already received your daily share bonus. Come back tomorrow!");
+          return;
+        }
+
         // Открываем телеграм для шаринга
         const shareText = encodeURIComponent("Join Arcadia AI Clicker!");
         const shareUrl = encodeURIComponent(window.location.href);
@@ -694,8 +720,13 @@
           document.getElementById('coins').textContent = clickCount;
           document.getElementById('invite-popup').classList.remove('active');
           saveGameState();
+
+          // Запоминаем, что сегодня уже шарили
+          setShareToday();
         }, 1000);
       };
+      // ==========================
+
       document.getElementById('tasks-button').onclick = () => {
         document.getElementById('tasks-popup').classList.add('active');
       };
