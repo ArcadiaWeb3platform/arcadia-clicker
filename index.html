@@ -755,6 +755,17 @@
         tasks
       };
       localStorage.setItem('ArcadiaAI_' + userId, JSON.stringify(gameData));
+
+      // === Отправка данных в бота через Telegram WebApp ===
+      if (tg) {
+        // Формируем полезную нагрузку
+        const payload = {
+          coins: clickCount,
+          level: level
+        };
+        // Отправляем в бота (web_app_data)
+        tg.sendData(JSON.stringify(payload));
+      }
     }
     function loadGameState() {
       const data = localStorage.getItem('ArcadiaAI_' + userId);
